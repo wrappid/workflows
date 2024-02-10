@@ -17,6 +17,8 @@ jobs:
   
         - name: 🛒 Checkout repository
           uses: actions/checkout@v4
+          with:
+            token: ${{ secrets.PAT }}
   
         - name: 🛠 Setup gh and git
           run: |
