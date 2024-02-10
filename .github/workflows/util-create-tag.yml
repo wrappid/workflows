@@ -42,20 +42,20 @@ jobs:
            echo Installing Node Modules
            npm ci
   
-        - name: 🔄 Update Attribution
-          run: |
-           npm run attributions:gen
-           chmod +x ./.github/scripts/attribution_header_adder.sh
-           bash ./.github/scripts/attribution_header_adder.sh ${{ github.event.repository.name }}
-           git pull
-           git add ATTRIBUTIONS.md
-           git commit -m "docs(global): :memo: update attribution
+        # - name: 🔄 Update Attribution
+        #   run: |
+        #    npm run attributions:gen
+        #    chmod +x ./.github/scripts/attribution_header_adder.sh
+        #    bash ./.github/scripts/attribution_header_adder.sh ${{ github.event.repository.name }}
+        #    git pull
+        #    git add ATTRIBUTIONS.md
+        #    git commit -m "docs(global): :memo: update attribution
   
-           update attributions content
+        #    update attributions content
   
-           by Publish CI"
-          env:
-            GITHUB_TOKEN: ${{ secrets.PAT }}
+        #    by Publish CI"
+        #   env:
+        #     GITHUB_TOKEN: ${{ secrets.PAT }}
   
         - name: ⬆️ Update version
           run:  npm run release -- ${{ steps.release-type-input.outputs.version_type}}
