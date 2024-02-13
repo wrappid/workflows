@@ -51,7 +51,7 @@ jobs:
 ##       CHECK IF ANY CHANGES IN ATTRIBUTION
 ##       IF CHANGES FOUND, COMMIT
 
-        # - name: 🔄 Update Attribution
+# - name: 🔄 Update Attribution
         #   run: |
         #    npm run attributions:gen
         #    chmod +x ./.github/scripts/attribution_header_adder.sh
@@ -90,7 +90,7 @@ jobs:
           with:
             # email-to: "${{ secrets.IDS }}"
             # email-cc: "${{ secrets.MAINTAINER_ID }}"
-            tag-version: ${{ needs.create-tag.outputs['create-tag.outputs.tag-version'] }}
+            tag-version: ${{ needs.create-tag.outputs.tag-version }}
             
   
       
