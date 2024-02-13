@@ -44,7 +44,7 @@ jobs:
                         <p>Hi Maintainers,</p>
 
                         <p>
-                        Tag released ${{ github.event.repository.name }}, ${{ steps.extract_version.outputs.version }}. 🚀<br>
+                        Tag released ${{ github.event.repository.name }}, ${{ inputs.tag-version }}. 🚀<br>
                         You can check out the details on our <a href="https://github.com/wrappid/${{ github.event.repository.name }}/releases/latest">${{ github.event.repository.name }} page</a>.
                         </p>
 
