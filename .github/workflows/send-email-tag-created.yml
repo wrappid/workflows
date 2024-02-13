@@ -2,12 +2,12 @@ name: Send Email - Tag Created
 on:
     workflow_call:
         inputs:
-            email-to:
-                required: true
-                type: string
-            email-cc:
-                required: true
-                type: string
+            # email-to:
+            #     required: true
+            #     type: string
+            # email-cc:
+            #     required: true
+            #     type: string
             tag-version:
                 required: true
                 type: string
@@ -24,12 +24,12 @@ jobs:
             with:
                 server_address: smtp.gmail.com
                 server_port: 465
-                username: ${{secrets.MAIL_USERNAME}}
-                password: ${{secrets.MAIL_PASSWORD}}
+                username: ${{ secrets.MAIL_USERNAME }}
+                password: ${{ secrets.MAIL_PASSWORD }}
                 secure: true
                 from: Wrappid Care
-                to: ${{ inputs.email-to }}
-                cc: ${{ inputs.email-cc }}
+                to: ${{ secrets.IDS }}
+                cc: ${{ secrets.MAINTAINER_ID }}
                 subject: Tag Created - ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀
                 html_body: |
                     <html lang="en">

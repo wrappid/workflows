@@ -88,8 +88,8 @@ jobs:
           uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@main
           secrets: inherit
           with:
-            email-to: "${{ secrets.IDS }}"
-            email-cc: "${{ secrets.MAINTAINER_ID }}"
+            # email-to: "${{ secrets.IDS }}"
+            # email-cc: "${{ secrets.MAINTAINER_ID }}"
             tag-version: ${{ jobs.create-tag.outputs.tag-version }}
             
   
