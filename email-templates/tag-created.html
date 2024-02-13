@@ -1,0 +1,22 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exciting News from Wrappiders</title>
+</head>
+
+<body style="font-size: 1rem;">
+    <p>Hi Maintainers,</p>
+
+    <p>
+    Tag released ${{ github.event.repository.name }}, ${{ steps.extract_version.outputs.version }}. 🚀<br>
+    You can check out the details on our <a href="https://github.com/wrappid/${{ github.event.repository.name }}/releases/latest">${{ github.event.repository.name }} page</a>.
+    </p>
+
+    <p>Thanks and Regards,<br>
+    Wrappid Care</p>
+    <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "Create Tag - CI" GitHub Action</footer>
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+name: Send Email - Tag Created
+on:
+    workflow_call:
+        inputs:
+            email-to:
+                required: true
+                type: string
+            email-cc:
+                required: true
+                type: string
+            tag-version:
+                required: true
+                type: string
+jobs:
+    send-email:
+        name: Send Email
+        runs-on: ubuntu-latest
+        steps:
+
+## TODO: USE EMAIL TEMPLATES
+
+          - name: 📧 Send mail
+            uses: dawidd6/action-send-mail@v3
+            with:
+                server_address: smtp.gmail.com
+                server_port: 465
+                username: ${{secrets.MAIL_USERNAME}}
+                password: ${{secrets.MAIL_PASSWORD}}
+                secure: true
+                from: Wrappid Care
+                to: ${{ inputs.email-to }}
+                cc: ${{ inputs.email-cc }}
+                subject: Tag Created - ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀
+                html_body: |
+                    <html lang="en">
+
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Exciting News from Wrappiders</title>
+                    </head>
+
+                    <body style="font-size: 1rem;">
+                        <p>Hi Maintainers,</p>
+
+                        <p>
+                        Tag released ${{ github.event.repository.name }}, ${{ steps.extract_version.outputs.version }}. 🚀<br>
+                        You can check out the details on our <a href="https://github.com/wrappid/${{ github.event.repository.name }}/releases/latest">${{ github.event.repository.name }} page</a>.
+                        </p>
+
+                        <p>Thanks and Regards,<br>
+                        Wrappid Care</p>
+                        <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "Create Tag - CI" GitHub Action</footer>
+                    </body>
+
+                    </html>
+

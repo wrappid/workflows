@@ -4,10 +4,12 @@ on:
   workflow_call:
 
 jobs:        
-    create_tag:
+    create-tag:
+      name: Create Tag
       runs-on: ubuntu-latest
       permissions: write-all
-  
+      outputs:
+        tag-version:  ${{ steps.extract_version.outputs.version }}
       steps:
   
         - name: 🛠 Set up Node.js
@@ -44,6 +46,11 @@ jobs:
            echo Installing Node Modules
            npm ci
   
+## TODO: 
+##       ADD ATTRIBUTION TRIGGER
+##       CHECK IF ANY CHANGES IN ATTRIBUTION
+##       IF CHANGES FOUND, COMMIT
+
         # - name: 🔄 Update Attribution
         #   run: |
         #    npm run attributions:gen
@@ -75,40 +82,16 @@ jobs:
           run: echo ${{ steps.extract_version.outputs.version }}
 
 
-
-        - name: 📧 Send mail
-          uses: dawidd6/action-send-mail@v3
+    call-send-email-tag-created:
+          needs: create-tag
+          permissions: write-all
+          uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@main
+          secrets: inherit
           with:
-              server_address: smtp.gmail.com
-              server_port: 465
-              username: ${{secrets.MAIL_USERNAME}}
-              password: ${{secrets.MAIL_PASSWORD}}
-              secure: true
-              from: Wrappid Care
-              to: ${{secrets.IDS}}
-              cc: ${{secrets.MAINTAINER_ID}}
-              subject: Tag Created - ${{ github.event.repository.name }} ${{ steps.extract_version.outputs.version }}. 🚀
-              html_body: |
-                <html lang="en">
-
-                <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Exciting News from Wrappiders</title>
-                </head>
-
-                <body>
-                  <p>Hi Maintainers,</p>
-
-                  <p>
-                    Tag released ${{ github.event.repository.name }}, ${{ steps.extract_version.outputs.version }}. 🚀<br>
-                    You can check out the details on our <a href="https://github.com/wrappid/${{ github.event.repository.name }}/releases/latest">${{ github.event.repository.name }} page</a>.
-                  </p>
-
-                  <p>Thanks and Regards,<br>
-                    Wrappid Care</p>
-                    <footer style="font-size: 1rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "Create Tag - CI" GitHub Action</footer>
-                </body>
-
-                </html>
+            email-to: "${{ secrets.IDS }}"
+            email-cc: "${{ secrets.MAINTAINER_ID }}"
+            tag-version: ${{ jobs.create-tag.outputs.tag-version }}
+            
+  
+      
   
