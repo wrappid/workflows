@@ -22,7 +22,7 @@ echo "CHANGING WORKING DIRECTORY TO "$HOME"/temp TO DOWNLOAD LATEST RELEASE OF $
 create_folder_if_not_exists "$HOME/temp"
 echo "CLEANING UP PREVIOUS RELEASE ARTIFACT..."
 echo $HOME/temp/
-rm -rf $HOME/temp/*
+sudo rm -rf $HOME/temp/*
 echo "========================="
 cd $HOME/temp
 echo "========================="
@@ -48,7 +48,7 @@ echo "SHOW ALL FILES:"
 ls -al 
 echo "CLEANING UP OLD SETUP OF $REPONAME ..."
 echo $HOME/$REPONAME/
-rm -rf $HOME/$REPONAME/*
+sudo rm -rf $HOME/$REPONAME/*
 echo "========================="
 echo "CLEANED OLD SETUP OF $REPONAME."
 echo "========================="
@@ -59,14 +59,14 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "COPYING NEW ARTIFICAT FROM "$HOME"/temp/ TO "$HOME"/$REPONAME..."
-cp $HOME/temp/*.zip $HOME/$REPONAME/
+sudo cp $HOME/temp/*.zip $HOME/$REPONAME/
 echo "========================="
 echo "COPIED NEW ARTIFACT."
 echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "UNZIPPING COPIED ARTIFACT ..."
-unzip web*.zip
+sudo unzip web*.zip
 #  > /dev/null
 echo "========================="
 echo "UNZIPPED COPIED ARTIFACT"
