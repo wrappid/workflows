@@ -12,6 +12,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Get repository name
         run: |
           REPOSITORY_NAME=${{ github.repository }}
