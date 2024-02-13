@@ -15,7 +15,7 @@ jobs:
         run: |
           REPOSITORY_NAME=${{ github.repository }}
           # Extract repository name only (optional)
-          REPOSITORY_NAME=${REPOSITORY_NAME##*/}
+          # REPOSITORY_NAME=${REPOSITORY_NAME##*/}
           echo "Repository name: $REPOSITORY_NAME"
           
       - name: Get tag name
