@@ -16,6 +16,22 @@ create_folder_if_not_exists() {
     fi
 }
 
+#!/bin/bash
+
+manage_pm2_process() {
+    process_name="$1"
+
+    # Check if the process is already running
+    if pm2 pid "$process_name" > /dev/null; then
+        # If running, restart the process
+        pm2 restart "$process_name"
+    else
+        # If not running, start the process
+        pm2 start npm --name "$process_name" -- start
+    fi
+}
+
+
 echo "$REPONAME-DEPLOY SCRIPT STARTED."
 echo "========================="
 echo "CHANGING WORKING DIRECTORY TO "$HOME"/temp TO DOWNLOAD LATEST RELEASE OF $REPONAME."
@@ -72,7 +88,8 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "RESTARTING PM2 $REPONAME ..."
-pm2 restart $REPONAME
+manage_pm2_process $REPONAME
+# pm2 restart $REPONAME
 echo "========================="
 echo "RESTARTED $REPONAME."
 echo "$REPONAME-DEPLOY SCRIPT EXECUTION COMPLETED."
