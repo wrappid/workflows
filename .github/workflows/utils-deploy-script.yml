@@ -1,0 +1,29 @@
+name: Service Deploy - CD
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+            token: ${{ secrets.PAT }}
+
+      - name: Extract version
+        id: extract_version
+        uses: Saionaro/extract-package-version@v1.0.6
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_STAGE_HOST }}       
+          username: ${{ secrets.AWS_STAGE_USER }}     
+          key: ${{ secrets.AWS_STAGE_SSH_KEY }}
+          port: 22
+          script: |
+            curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/service-deploy.sh | bash -s ${{ github.event.repository.name }}
+  
