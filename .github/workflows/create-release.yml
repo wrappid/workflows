@@ -1,0 +1,49 @@
+name: Create Release
+
+on:
+  # Currently on workflow dispatch manually but we could give other trigger variants later on
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name for the release (optional)"
+      branch_name:
+        description: "Branch name to build from (optional)"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get repository name
+        run: |
+          REPOSITORY_NAME=${{ github.repository }}
+          # Extract repository name only (optional)
+          REPOSITORY_NAME=${REPOSITORY_NAME##*/}
+          echo "Repository name: $REPOSITORY_NAME"
+          
+      - name: Get tag name
+        run: |
+          TAG_NAME=${{ inputs.tag_name }}
+          if [[ -z "$TAG_NAME" ]]; then
+            # Use latest tag if not provided
+            TAG_NAME=$(git describe --tags --abbrev-commitish)
+          fi
+          echo "Tag name: $TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Get branch name
+        run: |
+          BRANCH_NAME=${{ inputs.branch_name }}
+          if [[ -z "$BRANCH_NAME" ]]; then
+            # Use development branch if not provided
+            BRANCH_NAME="development"
+          fi
+          echo "Branch name: $BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: actions/create-release@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_tag_name.outputs.TAG_NAME }}
+          target_commitish: ${{ steps.get_branch_name.outputs.BRANCH_NAME }}
+          release_body: "Automated release from ${{ steps.get_branch_name.outputs.BRANCH_NAME }} branch"
+          
