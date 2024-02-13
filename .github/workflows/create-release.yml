@@ -24,7 +24,7 @@ jobs:
           TAG_NAME=${{ inputs.tag_name }}
           if [[ -z "$TAG_NAME" ]]; then
             # Use latest tag if not provided
-            TAG_NAME=$(git describe --tags --abbrev=0)
+            TAG_NAME=${{ git describe --tags --abbrev=0 }}
           fi
           echo "Tag name: $TAG_NAME" >> $GITHUB_OUTPUT
 
