@@ -25,6 +25,7 @@ echo "========================="
 echo "CHANGED DIRECTORY. \nCURRENT WORKING DIRECTORY: "$PWD""
 echo "========================="
 echo "CLEANING UP PREVIOUS RELEASE ARTIFACT..."
+echo $PWD
 rm -rf *
 echo "========================="
 echo "CLEANED PREVIOUS RELEASE ARTIFACT."
@@ -44,13 +45,13 @@ echo "========================="
 echo "CHANGING WORKING DIRECTORY TO "$HOME"/$REPONAME"
 create_folder_if_not_exists "$HOME/$REPONAME"
 cd $HOME/$REPONAME
-echo $PWD
 echo "========================="
 echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "CLEANING UP OLD SETUP OF $REPONAME ..."
-# rm -rf *
+echo $PWD
+rm -rf *
 echo "========================="
 echo "CLEANED OLD SETUP OF $REPONAME."
 echo "SHOW ALL FILES:"
