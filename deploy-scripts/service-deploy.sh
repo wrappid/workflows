@@ -7,9 +7,19 @@
 
 REPONAME=$1
 
+create_folder_if_not_exists() {
+    folder_path="$1"
+
+    if [ ! -d "$folder_path" ]; then
+        mkdir -p "$folder_path"
+        echo "Folder created: $folder_path"
+    fi
+}
+
 echo "$REPONAME-DEPLOY SCRIPT STARTED."
 echo "========================="
 echo "CHANGING WORKING DIRECTORY TO "$HOME"/temp TO DOWNLOAD LATEST RELEASE OF $REPONAME."
+create_folder_if_not_exists "$HOME/temp"
 cd $HOME/temp
 echo "========================="
 echo "CHANGED DIRECTORY. \nCURRENT WORKING DIRECTORY: "$PWD""
@@ -32,6 +42,7 @@ echo "========================="
 echo "CURRENT WORKING DIRECTORY: " $PWD
 echo "========================="
 echo "CHANGING WORKING DIRECTORY TO "$HOME"/$REPONAME"
+create_folder_if_not_exists "$HOME/$REPONAME"
 cd $HOME/$REPONAME
 echo "========================="
 echo "SHOW ALL FILES:"
@@ -58,8 +69,8 @@ echo "UNZIPPED COPIED ARTIFACT"
 echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
-echo "RESTARTING PM2 wrappidService ..."
-pm2 restart wrappidService
+echo "RESTARTING PM2 $REPONAME ..."
+pm2 restart $REPONAME
 echo "========================="
-echo "RESTARTED wrappidService."
+echo "RESTARTED $REPONAME."
 echo "$REPONAME-DEPLOY SCRIPT EXECUTION COMPLETED."
