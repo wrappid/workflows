@@ -4,9 +4,9 @@ on:
   workflow_call:
 
 jobs:
-  deploy:
+  service-deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Serivce Deploy
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -4,9 +4,9 @@ on:
   workflow_call:
 
 jobs:
-  deploy:
+  app-deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: App Deploy
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,5 +25,5 @@ jobs:
           key: ${{ secrets.AWS_STAGE_SSH_KEY }}
           port: 22
           script: |
-            curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/service-deploy.sh | bash -s ${{ github.event.repository.name }}
+            sudo -u ec2-user curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/app-deploy.sh | bash -s ${{ github.event.repository.name }}
   
