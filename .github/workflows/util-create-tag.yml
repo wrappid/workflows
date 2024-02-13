@@ -90,7 +90,7 @@ jobs:
           with:
             # email-to: "${{ secrets.IDS }}"
             # email-cc: "${{ secrets.MAINTAINER_ID }}"
-            tag-version: ${{ jobs.create-tag.outputs.tag-version }}
+            tag-version: ${{ needs.create-tag.outputs['create-tag.outputs.tag-version'] }}
             
   
       
