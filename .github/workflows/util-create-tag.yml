@@ -82,6 +82,14 @@ jobs:
           run: echo ${{ steps.extract_version.outputs.version }}
 
 
+    print-version:
+        runs-on: ubuntu-latest
+        needs: create-tag
+        permissions: write-all
+        steps:
+            - name: print
+              run: echo ${{ needs.create-tag.outputs.tag-version }}
+  
     call-send-email-tag-created:
           needs: create-tag
           permissions: write-all
