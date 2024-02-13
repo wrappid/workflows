@@ -25,7 +25,7 @@ echo "========================="
 echo "CHANGED DIRECTORY. \nCURRENT WORKING DIRECTORY: "$PWD""
 echo "========================="
 echo "CLEANING UP PREVIOUS RELEASE ARTIFACT..."
-rm -rf *
+# rm -rf *
 echo "========================="
 echo "CLEANED PREVIOUS RELEASE ARTIFACT."
 echo "SHOW ALL FILES:"
@@ -49,7 +49,7 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "CLEANING UP OLD SETUP OF $REPONAME ..."
-rm -rf *
+# rm -rf *
 echo "========================="
 echo "CLEANED OLD SETUP OF $REPONAME."
 echo "SHOW ALL FILES:"
