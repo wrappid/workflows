@@ -8,20 +8,27 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
       - uses: actions/checkout@v3
+      
       - name: Get repository name
         run: |
           REPOSITORY_NAME=${{ github.repository }}
           # Extract repository name only (optional)
           echo "Repository name: $REPOSITORY_NAME"
           
-      - name: Get tag names
+      - name: Get branch name
+        run: |
+          BRANCH_NAME=${{ inputs.branch_name }}
+          if [[ -z "$BRANCH_NAME" ]]; then
+            # Use development branch if not provided
+            BRANCH_NAME="development"
+          fi
+          echo "Branch name: $BRANCH_NAME" >> $GITHUB_OUTPUT
+          
+      - name: Get tag name
         run: |
           TAG_NAME=${{ inputs.tag_name }}
-          if [[ -z "$TAG_NAME" ]]; then
-            # Use latest tag if not provided
-            TAG_NAME=${{ git describe --tags --abbrev=0 }}
-          fi
           echo "Tag name: $TAG_NAME" >> $GITHUB_OUTPUT
 
       - name: Create release
