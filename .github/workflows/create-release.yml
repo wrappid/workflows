@@ -44,7 +44,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_tag_name.outputs.TAG_NAME }}
-          target_commitish: ${{ steps.get_branch_name.outputs.BRANCH_NAME }}
-          release_body: "Automated release from ${{ steps.get_branch_name.outputs.BRANCH_NAME }} branch"
+          tag_name: ${{ needs.prerequisite.outputs.tag_name }}
+          target_commitish: ${{ needs.prerequisite.outputs.branch_name }}
+          release_body: "Automated release from ${{ steps.prerequisite.outputs.branch_name }} branch"
           
