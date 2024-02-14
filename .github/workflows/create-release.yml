@@ -46,5 +46,5 @@ jobs:
         with:
           tag_name: ${{ needs.prerequisite.outputs.tag_name }}
           target_commitish: ${{ needs.prerequisite.outputs.branch_name }}
-          release_body: "Automated release from ${{ steps.prerequisite.outputs.branch_name }} branch"
+          release_body: "Automated release from ${{ needs.prerequisite.outputs.branch_name }} branch"
           
