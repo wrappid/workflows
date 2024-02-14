@@ -24,7 +24,7 @@ jobs:
   
         - name: 🛠 Setup gh and git
           run: |
-            echo ${{secrets.PAT}} | gh auth login --with-token
+            # echo ${{secrets.PAT}} | gh auth login --with-token
             git config user.name "${{ secrets.GHUSER_NAME }}"
             git config user.email "${{ secrets.GHUSER_EMAIL }}"
   
