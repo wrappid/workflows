@@ -19,7 +19,7 @@ jobs:
         run: |
           REPOSITORY_NAME=${{ github.repository }}
           # Extract repository name only (optional)
-          echo "Repository name: $REPOSITORY_NAME"
+          echo "repository_name=$REPOSITORY_NAME" >> "$GITHUB_OUTPUT"
           
       - name: Get branch name
         run: |
@@ -28,12 +28,12 @@ jobs:
             # Use development branch if not provided
             BRANCH_NAME="development"
           fi
-          echo "Branch name: $BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
           
       - name: Get tag name
         run: |
           TAG_NAME=${{ inputs.tag_name }}
-          echo "Tag name: $TAG_NAME" >> $GITHUB_OUTPUT
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Create release
         uses: actions/create-release@v1
