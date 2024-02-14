@@ -14,15 +14,17 @@ on:
 jobs:
   prerequisite:
     runs-on: ubuntu-latest
-    steps:      
-      - name: Get repository name
+    outputs:
+      repository_name: ${{ steps.get-inputs.outputs.repository_name }}
+      branch_name: ${{ steps.get-inputs.outputs.branch_name }}
+      tag_name: ${{ steps.get-inputs.outputs.tag_name }}
+    steps:
+      - id: get-inputs
         run: |
           REPOSITORY_NAME=${{ github.repository }}
           # Extract repository name only (optional)
           echo "repository_name=$REPOSITORY_NAME" >> "$GITHUB_OUTPUT"
           
-      - name: Get branch name
-        run: |
           BRANCH_NAME=${{ inputs.branch_name }}
           if [[ -z "$BRANCH_NAME" ]]; then
             # Use development branch if not provided
@@ -30,8 +32,6 @@ jobs:
           fi
           echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
           
-      - name: Get tag name
-        run: |
           TAG_NAME=${{ inputs.tag_name }}
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
 
