@@ -24,14 +24,12 @@ jobs:
           REPOSITORY_NAME=${{ github.repository }}
           # Extract repository name only (optional)
           echo "repository_name=$REPOSITORY_NAME" >> "$GITHUB_OUTPUT"
-          
           BRANCH_NAME=${{ inputs.branch_name }}
           if [[ -z "$BRANCH_NAME" ]]; then
             # Use development branch if not provided
             BRANCH_NAME="development"
           fi
           echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
-          
           TAG_NAME=${{ inputs.tag_name }}
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
 
