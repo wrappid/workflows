@@ -3,10 +3,6 @@ name: Create Release
 on:
   # Currently on workflow dispatch manually but we could give other trigger variants later on
   workflow_call:
-    inputs:
-      tag_name:
-      description: "Tag name for the release (optional)"
-      required: false
 
 jobs:
   release:
