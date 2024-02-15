@@ -89,8 +89,6 @@ jobs:
          echo Installing Node Modules
          npm ci --omit-dev
 
-
-
       - name: Setup Wrappid
         run: npm install -g @wrappid/toolkit@${{ secrets.TOOLKIT_VERSION }}
 
@@ -174,12 +172,12 @@ jobs:
           asset_content_type: text/plain
 
 
-    call-send-email-released:
-          needs: create-release
-          permissions: write-all
-          uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
-          secrets: inherit
-          with:
-            # email-to: "${{ secrets.IDS }}"
-            # email-cc: "${{ secrets.MAINTAINER_ID }}"
-            tag-version: ${{ needs.create-release.outputs.tag-version }}
+  call-send-email-released:
+      needs: create-release
+      permissions: write-all
+      uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
+      secrets: inherit
+      with:
+        # email-to: "${{ secrets.IDS }}"
+        # email-cc: "${{ secrets.MAINTAINER_ID }}"
+        tag-version: ${{ needs.create-release.outputs.tag-version }}
