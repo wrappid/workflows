@@ -30,7 +30,7 @@ jobs:
                 from: Wrappid Care
                 to: ${{ secrets.IDS }}
                 cc: ${{ secrets.MAINTAINER_ID }}
-                subject: Tag Created - ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀
+                subject: Tag Created - ${{ github.event.repository.name }} v${{ inputs.tag-version }}. 🚀
                 html_body: |
                     <html lang="en">
 

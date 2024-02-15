@@ -46,7 +46,7 @@ jobs:
                         <p>
                         ${{ github.event.repository.name }} ${{ inputs.tag-version }} released. 🚀<br>
                         You can check out the details by clicking below link
-                        https://github.com/wrappid/${{ github.event.repository.name }}/releases/tag/v${{ inputs.tag-version }}
+                        https://github.com/wrappid/${{ github.event.repository.name }}/releases/tag/${{ inputs.tag-version }}
                         </p>
                     
                         <p>Thanks and Regards,<br>

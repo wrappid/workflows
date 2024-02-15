@@ -75,7 +75,7 @@ jobs:
                   We have deployed a new version of our ${{ github.event.repository.name }}, ${{ steps.current-tag.outputs.tag }}. 🚀<br>
                   Start your hunt ${{ secrets.TEST_SERVICE_URL }}<br>
                   This version comes with some amazing new features and improvements that will make your experience even better.
-                  You can check out the latest release details here https://github.com/wrappid/test-wrappid-service/releases/latest.
+                  You can check out the latest release details here https://github.com/wrappid/test-wrappid-service/releases/tag/${{ steps.current-tag.outputs.tag }}
                 </p>
 
                 <p>Thanks and Regards,<br>
