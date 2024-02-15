@@ -16,7 +16,10 @@ jobs:
           uses: actions/setup-node@v4
           with:
             node-version: 16
-  
+            registry-url: https://npm.pkg.github.com/wrappid
+          env:
+            NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN}}      
+          
         - name: 🛒 Checkout repository
           uses: actions/checkout@v4
           with:
