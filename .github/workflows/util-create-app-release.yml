@@ -10,14 +10,6 @@ jobs:
     permissions: write-all
 
     steps:
-      - name: 🛠 Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 16
-          cache: 'npm'
-          registry-url: https://npm.pkg.github.com/wrappid
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN }} 
   
       - name: Check if tag is provided
         id: check_tag
@@ -38,7 +30,15 @@ jobs:
           ref: ${{ steps.tag.outputs.tag }}${{ steps.tag.outputs.latest_tag }}
           token: ${{ secrets.PAT }}
        
-
+      - name: 🛠 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+          cache: 'npm'
+          registry-url: https://npm.pkg.github.com/wrappid
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN }} 
+          
       - name: 🛠 Setup gh and git
         run: |
           echo ${{secrets.PAT}} | gh auth login --with-token
