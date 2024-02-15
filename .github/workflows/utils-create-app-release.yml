@@ -1,0 +1,204 @@
+on:
+    workflow_call:
+
+name: Create App Release - CD
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: 🛠 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+          cache: 'npm'
+          registry-url: https://npm.pkg.github.com/wrappid
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN }} 
+  
+      - name: Check if tag is provided
+        id: check_tag
+        run: echo ::set-output name=tag_exists::$(if [ -n "${{ github.event.inputs.tag-name }}" ]; then echo "true"; else echo "false"; fi)
+  
+      - name: Process Inputs
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag-name }}" ]; then
+            echo "::set-output name=tag::${{ github.event.inputs.tag-name }}"
+          else
+            echo "::set-output name=tag::$(git describe --tags `git rev-list --tags --max-count=1`)"
+          fi
+
+      - name: 🛒 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.tag }}${{ steps.tag.outputs.latest_tag }}
+          token: ${{ secrets.PAT }}
+       
+
+      - name: 🛠 Setup gh and git
+        run: |
+          echo ${{secrets.PAT}} | gh auth login --with-token
+          git config user.name "${{ secrets.GHUSER_NAME }}"
+          git config user.email "${{ secrets.GHUSER_EMAIL }}"
+
+
+## TODO
+# gh release view v0.0.409 --json name,tagName,createdAt,publishedAt --jq .name
+# if release name not specified, takes latest
+
+      # - name: 👀 Process Inputs
+      #   id: tag-version-input
+      #   run: |
+      #     if [ -z "${{ github.event.inputs.tag-name }}" ]; then
+      #       echo "Input Blank. \nLatest Tag will be used for release creation"
+      #       export TAG_VERSION_DEFAULT=""
+      #     else
+      #       export TAG_VERSION_DEFAULT="${{ github.event.inputs.tag-name }}"
+      #     fi
+      #     echo "Version type: $TAG_VERSION_DEFAULT"
+      #     echo "::set-output name=tag-version::$TAG_VERSION_DEFAULT"
+
+## TODO: CHECKOUT TAG
+
+
+      - name: ⬇️ Setup Project
+        run: | 
+         echo Installing Node Modules
+         npm ci --omit-dev
+
+
+
+      - name: Setup Wrappid
+        run: npm install -g @wrappid/toolkit@${{ secrets.TOOLKIT_VERSION }}
+
+      - name: Check Wrappid Version
+        run: wrappid --version
+
+#       - name: Wrappid setup mobile
+#         run: |
+#           gh auth status
+#           echo Starting Setup.........................
+#           wrappid setup mobile --env=stage
+
+#       - name: Setup JDK 11
+#         uses: actions/setup-java@v3
+#         with:
+#           java-version: '11'
+#           distribution: 'temurin'
+#           cache: gradle
+# #           cache-dependency-path: /.wrappid/runtime/mobile/android/
+
+#       - name: Change Permission of Gradle
+#         run: cd .wrappid/runtime/mobile/android/ && chmod +x gradlew
+
+#       - name: Build Wrappid android
+#         run: |
+#           gh auth status
+#           echo Starting Build.........................
+#           wrappid build android
+
+      - name: Wrappid Setup Web
+        run: |
+          gh auth status
+          echo Starting Build.........................
+          wrappid setup web --env=stage
+
+      - name: Build wrappid web
+        run: |
+          gh auth status
+          echo Starting Build.........................
+          wrappid build web
+
+      - name: Extract version
+        id: extract_version
+        uses: Saionaro/extract-package-version@v1.0.6
+
+      - name: Print version
+        run: echo ${{ steps.extract_version.outputs.version }}
+
+      - name: Install zip
+        run: sudo apt install zip -y
+
+      - name: Zip build
+        run: |
+          cd build/web
+          zip -r web-v${{ steps.extract_version.outputs.version }}.zip *
+
+      - run: ls -l
+
+      - name: Move Web zip to root
+        run: mv build/web/web-v${{ steps.extract_version.outputs.version }}.zip web-v${{ steps.extract_version.outputs.version }}.zip
+
+      # - name: Move apk to root
+      #   run: mv build/mobile/android/app-debug.apk android-v${{ steps.extract_version.outputs.version }}.apk
+
+      - run: ls -l
+
+      - name: Get wrappid logs
+        run: cp $(npm root -g)/@wrappid/logs/logs.log wrappid-logs-v${{ steps.extract_version.outputs.version }}.log
+
+      # - name: Get tags
+      #   run: git fetch --tags origin
+
+      # - name: Create tag
+      #   run: git tag v${{ steps.extract_version.outputs.version }} && git push origin v${{ steps.extract_version.outputs.version }}
+
+      - name: Generate Release notes
+        run: bash .github/scripts/release_notes.sh
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT}} # Personal Access Token
+        with:
+          tag_name: v${{ steps.extract_version.outputs.version }}
+          release_name: v${{ steps.extract_version.outputs.version }}
+          body_path: ./RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset Web
+        id: upload-web-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT}} # Personal Access Token
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./web-v${{ steps.extract_version.outputs.version }}.zip
+          asset_name: "web-v${{ steps.extract_version.outputs.version }}.zip"
+          asset_content_type: application/zip
+
+      # - name: Upload Release Asset Android
+      #   id: upload-android-release-asset 
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.PAT }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+      #     asset_path: ./android-v${{ steps.extract_version.outputs.version }}.apk
+      #     asset_name: "android-v${{ steps.extract_version.outputs.version }}.apk"
+      #     asset_content_type: application/vnd.android.package-archive
+
+      - name: Upload Release Asset Wrappid-Logs
+        id: upload-log-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./wrappid-logs-v${{ steps.extract_version.outputs.version }}.log
+          asset_name: "wrappid-logs-v${{ steps.extract_version.outputs.version }}.log"
+          asset_content_type: text/plain
+
+
+      # - name: 🚀 Create Release
+      #   if: ${{ steps.check-tag.outputs.release-exists == 'failure' }}
+      #   id: create_release
+      #   run: gh release create ${{ steps.latest-tag.outputs.tag }} *.tgz --title ${{ steps.latest-tag.outputs.tag }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
