@@ -45,8 +45,9 @@ jobs:
 
                         <p>
                         Tag released ${{ github.event.repository.name }}, ${{ inputs.tag-version }}. 🚀<br>
-                        You can check out the details on our <a href="https://github.com/wrappid/${{ github.event.repository.name }}/releases/latest">${{ github.event.repository.name }} page</a>.
+                        You can check out the details on our <a href="https://github.com/wrappid/${{ github.event.repository.name }}/releases/tag/v${{ inputs.tag-version }}">${{ github.event.repository.name }} page</a>.
                         </p>
+                        https://github.com/wrappid/{{ Repository Name }}/releases/tag/{{ Tag version }}
 
                         <p>Thanks and Regards,<br>
                         Wrappid Care</p>
