@@ -1,4 +1,4 @@
-name: Send Email - Tag Created
+name: Send Email - Released
 on:
     workflow_call:
         inputs:
@@ -30,7 +30,7 @@ jobs:
                 from: Wrappid Care
                 to: ${{ secrets.IDS }}
                 cc: ${{ secrets.MAINTAINER_ID }}
-                subject: Tag Created - ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀
+                subject: Released - ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀
                 html_body: |
                     <html lang="en">
 
@@ -44,7 +44,7 @@ jobs:
                         <p>Hi Maintainers,</p>
 
                         <p>
-                        Tag created ${{ github.event.repository.name }}, ${{ inputs.tag-version }}. 🚀<br>
+                        Tag ${{ github.event.repository.name }}, ${{ inputs.tag-version }} released. 🚀<br>
                         You can check out the details by clicking below link
                         https://github.com/wrappid/${{ github.event.repository.name }}/releases/tag/v${{ inputs.tag-version }}
                         </p>
