@@ -44,14 +44,14 @@ jobs:
                         <p>Hi Maintainers,</p>
 
                         <p>
-                        Tag ${{ github.event.repository.name }}, ${{ inputs.tag-version }} released. 🚀<br>
+                        ${{ github.event.repository.name }} ${{ inputs.tag-version }} released. 🚀<br>
                         You can check out the details by clicking below link
                         https://github.com/wrappid/${{ github.event.repository.name }}/releases/tag/v${{ inputs.tag-version }}
                         </p>
                     
                         <p>Thanks and Regards,<br>
                         Wrappid Care</p>
-                        <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "Create Tag - CI" GitHub Action</footer>
+                        <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "${{ github.workflow }}" GitHub Action</footer>
                     </body>
 
                     </html>
