@@ -14,7 +14,14 @@ jobs:
       - name: Check if tag is provided
         id: check_tag
         run: echo ::set-output name=tag_exists::$(if [ -n "${{ github.event.inputs.tag-name }}" ]; then echo "true"; else echo "false"; fi)
-  
+
+
+      - name: 🛒 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.tag }}${{ steps.tag.outputs.latest_tag }}
+          token: ${{ secrets.PAT }}
+
       - name: Process Inputs
         id: tag
         run: |
