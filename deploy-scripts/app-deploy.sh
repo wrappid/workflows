@@ -6,7 +6,7 @@
 #                 and extracts it.
 
 REPONAME=$1
-DESTINATION="/usr/share/nginx"
+# DESTINATION="/usr/share/nginx"
 create_folder_if_not_exists() {
     folder_path="$1"
 
@@ -73,7 +73,6 @@ echo "UNZIPPED COPIED ARTIFACT"
 echo "SHOW ALL FILES:"
 ls -al
 # create_folder_if_not_exists "$DESTINATION/$REPONAME"
-sudo -u root cp -r $HOME/$REPONAME $DESTINATION/
+# sudo -u root cp -r $HOME/$REPONAME $DESTINATION/
 echo "========================="
-echo "RESTARTED $REPONAME."
 echo "$REPONAME-DEPLOY SCRIPT EXECUTION COMPLETED."
