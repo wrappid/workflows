@@ -1,16 +1,57 @@
 name: Send Email - Deployed
-
 on:
-#   release:       # TRY WITH DEPLOY
-#     types: [created]
-    workflow_dispatch:
-
+    workflow_call:
+        inputs:
+            tag-version:
+                required: true
+                type: string
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: echo Hello World
+    send-email:
+        name: Send Email
+        runs-on: ubuntu-latest
+        steps:
+
+## TODO: USE EMAIL TEMPLATES
+
+          - name: 📧 Send mail
+            uses: dawidd6/action-send-mail@v3
+            with:
+              server_address: smtp.gmail.com
+              server_port: 465
+              username: ${{secrets.MAIL_USERNAME}}
+              password: ${{secrets.MAIL_PASSWORD}}
+              secure: true
+              from: Wrappid Care
+              to: ${{secrets.IDS}}
+              cc: ${{secrets.MAINTAINER_ID}}
+              subject: Deployed - ${{ github.event.repository.name }} - ${{ inputs.tag-version }}. 🚀
+              html_body: |
+                <html lang="en">
+
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Exciting News from Wrappiders</title>
+                </head>
+
+                <body style="font-size: 1rem;"">
+                  <p>Hi Wrappider Testers 🕵🏽‍♂️,</p>
+  
+                  <p>Its time to hunt those bugs again 🐛<br>
+                    We have deployed a new version of our ${{ github.event.repository.name }} project, ${{ steps.current-tag.outputs.tag }}. 🚀<br>
+                    Start your hunt ${{ secrets.PROJECT_HOSTED_URL }}<br>
+                    This version comes with some amazing new features and improvements that will make your experience even better.
+                    You can check out the latest release details here https://github.com/wrappid/${{ github.event.repository.name }}/releases/tag/${{ inputs.tag-version }}.
+                  </p>
+
+                  <p>Thanks and Regards,<br>
+                    Wrappid Care</p>
+                    <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "${{ github.workflow }}" GitHub Action</footer>
+                </body>
+  
+                </html>
+              ignore_cert: true
+              convert_markdown: true
+              # attachments: attachments.zip,git.diff
+              priority: normal
+

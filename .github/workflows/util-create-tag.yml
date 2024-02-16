@@ -39,12 +39,21 @@ jobs:
                 VERSION_TYPE_DEFAULT="${{ github.event.inputs.version_type }}"
                 ;;
               * )
-                echo "Invalid version type provided, defaulting to ' -r patch'"
-                VERSION_TYPE_DEFAULT=" -r patch"
+                if [ -n "${{ secrets.VERSION_TYPE_REPOSITORY_DEFAULT }}" ]; then
+                  VERSION_TYPE_DEFAULT="${{ secrets.VERSION_TYPE_REPOSITORY_DEFAULT }}"
+                else
+                  VERSION_TYPE_DEFAULT=" -r patch"
+                fi
                 ;;
             esac
+            ## SAFETY CHECK
+            if [ -z "$VERSION_TYPE_DEFAULT" ]; then
+              VERSION_TYPE_DEFAULT=" -r patch"
+            fi
+
             echo "Version type: $VERSION_TYPE_DEFAULT"
             echo "::set-output name=version_type::$VERSION_TYPE_DEFAULT"
+
 
         - name: ⬇️ Setup Project
           run: | 
@@ -59,8 +68,8 @@ jobs:
 # - name: 🔄 Update Attribution
         #   run: |
         #    npm run attributions:gen
-        #    chmod +x ./.github/scripts/attribution_header_adder.sh
-        #    bash ./.github/scripts/attribution_header_adder.sh ${{ github.event.repository.name }}
+        #    chmod +x $ATTRIBUTION_SCRIPT_PATH
+        #    bash $ATTRIBUTION_SCRIPT_PATH ${{ github.event.repository.name }}
         #    git pull
         #    git add ATTRIBUTIONS.md
         #    git commit -m "docs(global): :memo: update attribution
@@ -101,8 +110,6 @@ jobs:
           uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@main
           secrets: inherit
           with:
-            # email-to: "${{ secrets.IDS }}"
-            # email-cc: "${{ secrets.MAINTAINER_ID }}"
             tag-version: ${{ needs.create-tag.outputs.tag-version }}
             
   
