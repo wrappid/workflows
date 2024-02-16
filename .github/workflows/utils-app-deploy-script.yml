@@ -14,7 +14,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-            token: ${{ secrets.PAT }}
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
 
       - name: Get Current Tag
         id: current-tag
