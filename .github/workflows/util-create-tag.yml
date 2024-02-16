@@ -79,7 +79,9 @@ jobs:
         #    by Publish CI"
         #   env:
         #     GITHUB_TOKEN: ${{ secrets.PAT }}
-  
+        - name: Prepare for commit
+          run: rm -f .gitignore
+
         - name: ⬆️ Update version
           run:  npm run release -- ${{ steps.release-type-input.outputs.version_type}}
   
