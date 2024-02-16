@@ -31,7 +31,7 @@ jobs:
               username: ${{secrets.MAIL_USERNAME}}
               password: ${{secrets.MAIL_PASSWORD}}
               secure: true
-              from: $SENDER_NAME
+              from: ${{ env.SENDER_NAME }}
               to: ${{secrets.IDS}}
               cc: ${{secrets.MAINTAINER_ID}}
               subject: Deployed - ${{ github.event.repository.name }} - ${{ inputs.tag-version }}. 🚀
@@ -54,7 +54,7 @@ jobs:
                   </p>
 
                   <p>Thanks and Regards,<br>
-                    $SENDER_NAME</p>
+                    ${{ env.SENDER_NAME }}</p>
                     <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "${{ github.workflow }}" GitHub Action</footer>
                 </body>
   
