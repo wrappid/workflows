@@ -11,6 +11,16 @@ jobs:
         runs-on: ubuntu-latest
         steps:
 
+          - name: Sender Name configure
+            id: sender-name
+            run: |
+              if [[ -n "${{ secrets.SENDER_NAME }}" ]]; then
+                echo "SENDER_NAME=${{ secrets.SENDER_NAME }}" >> $GITHUB_ENV
+              else
+                REPOSITORY_OWNER_NAME=${{ github.repository_owner }}
+                echo "SENDER_NAME=${REPOSITORY_OWNER_NAME^}" >> $GITHUB_ENV
+              fi
+
 ## TODO: USE EMAIL TEMPLATES
 
           - name: 📧 Send mail
@@ -21,7 +31,7 @@ jobs:
               username: ${{secrets.MAIL_USERNAME}}
               password: ${{secrets.MAIL_PASSWORD}}
               secure: true
-              from: Wrappid Care
+              from: $SENDER_NAME
               to: ${{secrets.IDS}}
               cc: ${{secrets.MAINTAINER_ID}}
               subject: Deployed - ${{ github.event.repository.name }} - ${{ inputs.tag-version }}. 🚀
@@ -31,21 +41,20 @@ jobs:
                 <head>
                   <meta charset="UTF-8">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Exciting News from Wrappiders</title>
                 </head>
 
                 <body style="font-size: 1rem;"">
-                  <p>Hi Wrappider Testers 🕵🏽‍♂️,</p>
+                  <p>Hi Testers 🕵🏽‍♂️,</p>
   
                   <p>Its time to hunt those bugs again 🐛<br>
                     We have deployed a new version of our ${{ github.event.repository.name }} project, ${{ steps.current-tag.outputs.tag }}. 🚀<br>
                     Start your hunt ${{ secrets.PROJECT_HOSTED_URL }}<br>
                     This version comes with some amazing new features and improvements that will make your experience even better.
-                    You can check out the latest release details here https://github.com/wrappid/${{ github.event.repository.name }}/releases/tag/${{ inputs.tag-version }}.
+                    You can check out the latest release details here https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/tag/${{ inputs.tag-version }}.
                   </p>
 
                   <p>Thanks and Regards,<br>
-                    Wrappid Care</p>
+                    $SENDER_NAME</p>
                     <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "${{ github.workflow }}" GitHub Action</footer>
                 </body>
   
