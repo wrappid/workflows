@@ -105,7 +105,9 @@ jobs:
         steps:
             - name: print
               run: echo ${{ needs.create-tag.outputs.tag-version }}
-  
+
+    ## REUSABLE WORKFLOW
+    ## RESUABLE WORKFLOW REQUIRED SECRETS WITH SAMPLE VALUE:
     call-send-email-tag-created:
           needs: create-tag
           permissions: write-all
