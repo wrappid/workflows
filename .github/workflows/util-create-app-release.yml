@@ -149,8 +149,8 @@ jobs:
       - name: Move Web zip to root
         run: mv build/web/web-v${{ steps.extract_version.outputs.version }}.zip web-v${{ steps.extract_version.outputs.version }}.zip
 
-      # - name: Move apk to root
-      #   run: mv build/mobile/android/app-debug.apk android-v${{ steps.extract_version.outputs.version }}.apk
+      - name: Move apk to root
+        run: mv build/mobile/android/app-debug.apk android-v${{ steps.extract_version.outputs.version }}.apk
 
       - run: ls -l
 
