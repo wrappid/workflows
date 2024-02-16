@@ -43,7 +43,7 @@ jobs:
       - name: Print final tag to checkout
         run: echo ${{ steps.tag.outputs.tag }}
 
-      - name: 🛒 Checkout Repository
+      - name: 🛒 Checkout Tag
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.tag.outputs.tag }}
@@ -134,7 +134,7 @@ jobs:
         run: cp $(npm root -g)/@wrappid/logs/logs.log wrappid-logs-v${{ steps.extract_version.outputs.version }}.log
 
       - name: Generate Release notes
-        run: bash .github/scripts/release_notes.sh
+        run: curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/release_notes.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
 
       - name: Create Release
         id: create_release

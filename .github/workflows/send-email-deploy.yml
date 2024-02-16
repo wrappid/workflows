@@ -1,10 +1,10 @@
 name: Send Email - Deployed
 on:
-    workflow_call:
-        inputs:
-            tag-version:
-                required: true
-                type: string
+  workflow_call:
+      inputs:
+          tag-version:
+              required: true
+              type: string
 jobs:
     send-email:
         name: Send Email
