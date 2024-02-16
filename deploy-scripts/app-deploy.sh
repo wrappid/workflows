@@ -2,10 +2,10 @@
 # Script Author : Ananta Kumar Ghosh
 # Contact       : ananta@anantakumarghosh.me
 #               : antaghosh@protonmail.com
-# Description   : This script downloads latest release from  github (wrappid/REPONAME)
+# Description   : This script downloads latest release from  github ($OWNER_NAME/$REPONAME)
 #                 and extracts it.
-
-REPONAME=$1
+OWNER_NAME=$1
+REPONAME=$2
 # DESTINATION="/usr/share/nginx"
 create_folder_if_not_exists() {
     folder_path="$1"
@@ -33,7 +33,7 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "STARTING DOWNLOAD OF $REPONAME ..."
-gh release download --pattern "web*.zip" -R wrappid/$REPONAME
+gh release download --pattern "web*.zip" -R $OWNER_NAME/$REPONAME
 echo "========================="
 echo "DOWNLOADED FILES:"
 ls -al

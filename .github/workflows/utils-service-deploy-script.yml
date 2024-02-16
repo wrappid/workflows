@@ -33,7 +33,7 @@ jobs:
           key: ${{ secrets.AWS_STAGE_SSH_KEY }}
           port: 22
           script: |
-            curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/service-deploy.sh | bash -s ${{ github.event.repository.name }}
+            curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/service-deploy.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
 
 
   call-send-email-deployed:
