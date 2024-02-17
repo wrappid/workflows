@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.EMAIL_USER_ID }}
           password: ${{ secrets.EMAIL_USER_PASSWORD }}
           secure: true
-          from: ${{ inputs.EMAIL_SENDER_NAME }}
+          from: ${{ env.SENDER_NAME }}
           to: ${{ secrets.EMAIL_TO }}
           cc: ${{ secrets.EMAIL_CC }}
           bcc: ${{ secrets.EMAIL_BCC }}
@@ -69,7 +69,7 @@ jobs:
                 </p>
             
                 <p>Thanks and Regards,<br>
-                ${{ inputs.EMAIL_SENDER_NAME }}</p>
+                ${{ env.SENDER_NAME }}</p>
                 <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "Create Tag - CI" GitHub Action</footer>
             </body>
 
