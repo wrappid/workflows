@@ -223,7 +223,7 @@ jobs:
   call-send-email-released:
       needs: create-release
       permissions: write-all
-      uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
+      uses: wrappid/workflows/.github/workflows/send-email-released.yml@v0.0.1
       secrets: inherit
       with:
         # email-to: "${{ secrets.IDS }}"
