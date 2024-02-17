@@ -13,6 +13,9 @@ on:
           required: true
           type: string
           default: "true"
+        EMAIL_SENDER_NAME:
+          required: false
+          type: string
      secrets:
         PAT:
           required: true
@@ -28,7 +31,6 @@ on:
         EMAIL_TO:
         EMAIL_CC:     ## Optional
         EMAIL_BCC:    ## Optional
-        EMAIL_SENDER_NAME:  ## Optional
           
 jobs:        
     create-tag:
@@ -140,6 +142,7 @@ jobs:
           uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@main
           with:
             tag-version: ${{ needs.create-tag.outputs.tag-version }}
+            EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
           secrets:
             EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
             EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
