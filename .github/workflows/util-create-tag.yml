@@ -48,7 +48,12 @@ jobs:
             registry-url: https://npm.pkg.github.com/wrappid
           env:
             NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN}}      
-          
+
+        - name: Setup Wrappid npm registry
+          run: |
+            npm config set @wrappid:registry https://npm.pkg.github.com/wrappid
+            npm config set //npm.pkg.github.com/:_authToken ${{ secrets.WRAPPID_REGISTRY_TOKEN }}
+
         - name: 🛒 Checkout repository
           uses: actions/checkout@v4
           with:
