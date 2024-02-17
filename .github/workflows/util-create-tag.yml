@@ -111,7 +111,7 @@ jobs:
     call-send-email-tag-created:
           needs: create-tag
           permissions: write-all
-          uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@main
+          uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@v0.0.1
           secrets: inherit
           with:
             tag-version: ${{ needs.create-tag.outputs.tag-version }}
