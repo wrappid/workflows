@@ -7,9 +7,6 @@ on:
         TOOLKIT_VERSION:
           required: true
           type: string
-        VERSION_TYPE_REPOSITORY_DEFAULT:
-          required: false
-          type: string
         EMAIL_NOTIFY:
           required: true
           type: string
