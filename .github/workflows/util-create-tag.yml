@@ -139,7 +139,6 @@ jobs:
           uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@main
           with:
             tag-version: ${{ needs.create-tag.outputs.tag-version }}
-            EMAIL_NOTIFY: ${{ inputs.EMAIL_NOTIFY }}
           secrets:
             EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
             EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
