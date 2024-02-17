@@ -2,7 +2,33 @@ name: Create Tag - CI
 
 on:
   workflow_call:
-
+     inputs:
+        GIT_USER_NAME:
+          required: true
+          type: string
+        VERSION_TYPE_REPOSITORY_DEFAULT:
+          required: false
+          type: string
+        EMAIL_NOTIFY:
+          required: true
+          type: boolean
+     secrets:
+        PAT:
+          required: true
+        GIT_USER_EMAIL:
+          required: true
+        WRAPPID_REGISTRY_TOKEN:
+          required: true
+  ## Below secrets are required if EMAIL_NOTIFY is TRUE
+        EMAIL_SERVER_ADDRESS:
+        EMAIL_SERVER_PORT:
+        EMAIL_USER_ID:
+        EMAIL_USER_PASSWORD:
+        EMAIL_TO:
+        EMAIL_CC:     ## Optional
+        EMAIL_BCC:    ## Optional
+        EMAIL_SENDER_NAME:  ## Optional
+          
 jobs:        
     create-tag:
       name: Create Tag
@@ -28,8 +54,8 @@ jobs:
         - name: 🛠 Setup gh and git
           run: |
             # echo ${{secrets.PAT}} | gh auth login --with-token
-            git config user.name "${{ secrets.GHUSER_NAME }}"
-            git config user.email "${{ secrets.GHUSER_EMAIL }}"
+            git config user.name "${{ inputs.GIT_USER_NAME }}"
+            git config user.email "${{ secrets.GIT_USER_EMAIL }}"
   
         - name: 👀 Process Inputs
           id: release-type-input
@@ -105,17 +131,23 @@ jobs:
         steps:
             - name: print
               run: echo ${{ needs.create-tag.outputs.tag-version }}
-
-    ## REUSABLE WORKFLOW
-    ## RESUABLE WORKFLOW REQUIRED SECRETS WITH SAMPLE VALUE:
+  
     call-send-email-tag-created:
           needs: create-tag
+          if: ${{ inputs.EMAIL_NOTIFY }} == true
           permissions: write-all
           uses: wrappid/workflows/.github/workflows/send-email-tag-created.yml@main
-          secrets: inherit
           with:
             tag-version: ${{ needs.create-tag.outputs.tag-version }}
-            
+            EMAIL_NOTIFY: ${{ inputs.EMAIL_NOTIFY }}
+          secrets:
+            EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+            EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
+            EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
+            EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+            EMAIL_TO: ${{ secrets.EMAIL_TO }}
+            EMAIL_CC: ${{ secrets.EMAIL_CC }}       ## Optional
+            EMAIL_BCC: ${{ secrets.EMAIL_BCC }}     ## Optional
   
       
   

@@ -1,60 +1,77 @@
 name: Send Email - Tag Created
 on:
-    workflow_call:
-        inputs:
-            tag-version:
-                required: true
-                type: string
+  workflow_call:
+    inputs:
+      tag-version:
+        required: true
+        type: string
+      EMAIL_SENDER_NAME:      ## Optional
+        type: string
+    secrets:
+      EMAIL_SERVER_ADDRESS:
+        required: true
+      EMAIL_SERVER_PORT:
+        required: true
+      EMAIL_USER_ID:
+        required: true
+      EMAIL_USER_PASSWORD:
+        required: true
+      EMAIL_TO:
+        required: true
+      EMAIL_CC:               ## Optional
+      EMAIL_BCC:              ## Optional
+
 jobs:
-    send-email:
-        name: Send Email
-        runs-on: ubuntu-latest
-        steps:
-          - name: Sender Name configure
-            id: sender-name
-            run: |
-                if [[ -n "${{ secrets.SENDER_NAME }}" ]]; then
-                    echo "SENDER_NAME=${{ secrets.SENDER_NAME }}" >> $GITHUB_ENV
-                else
-                    REPOSITORY_OWNER_NAME=${{ github.repository_owner }}
-                    echo "SENDER_NAME=${REPOSITORY_OWNER_NAME^}" >> $GITHUB_ENV
-                fi
+  send-email:
+    name: Send Email
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sender Name configure
+        id: sender-name
+        run: |
+          if [[ -n "${{ inputs.EMAIL_SENDER_NAME }}" ]]; then
+              echo "SENDER_NAME=${{ inputs.EMAIL_SENDER_NAME }}" >> $GITHUB_ENV
+          else
+              REPOSITORY_OWNER_NAME=${{ github.repository_owner }}
+              echo "SENDER_NAME=${REPOSITORY_OWNER_NAME^}" >> $GITHUB_ENV
+          fi
 
 ## TODO: USE EMAIL TEMPLATES
 
-          - name: 📧 Send mail
-            uses: dawidd6/action-send-mail@v3
-            with:
-                server_address: smtp.gmail.com
-                server_port: 465
-                username: ${{ secrets.MAIL_USERNAME }}
-                password: ${{ secrets.MAIL_PASSWORD }}
-                secure: true
-                from: ${{ env.SENDER_NAME }}
-                to: ${{ secrets.IDS }}
-                cc: ${{ secrets.MAINTAINER_ID }}
-                subject: Tag Created - ${{ github.event.repository.name }} v${{ inputs.tag-version }}. 🚀
-                html_body: |
-                    <html lang="en">
+      - name: 📧 Send mail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+          server_port: ${{ secrets.EMAIL_SERVER_PORT }}
+          username: ${{ secrets.EMAIL_USER_ID }}
+          password: ${{ secrets.EMAIL_USER_PASSWORD }}
+          secure: true
+          from: ${{ inputs.EMAIL_SENDER_NAME }}
+          to: ${{ secrets.EMAIL_TO }}
+          cc: ${{ secrets.EMAIL_CC }}
+          bcc: ${{ secrets.EMAIL_BCC }}
+          subject: Tag Created - ${{ github.event.repository.name }} v${{ inputs.tag-version }}. 🚀
+          html_body: |
+            <html lang="en">
 
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    </head>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
 
-                    <body style="font-size: 1rem;">
-                        <p>Hi Maintainers,</p>
+            <body style="font-size: 1rem;">
+                <p>Hi Maintainers,</p>
 
-                        <p>
-                        Tag created ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀<br>
-                        You can check out the details by clicking below link
-                        https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/tag/v${{ inputs.tag-version }}
-                        </p>
-                    
-                        <p>Thanks and Regards,<br>
-                        ${{ env.SENDER_NAME }}</p>
-                        <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "Create Tag - CI" GitHub Action</footer>
-                    </body>
+                <p>
+                Tag created ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀<br>
+                You can check out the details by clicking below link
+                https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/tag/v${{ inputs.tag-version }}
+                </p>
+            
+                <p>Thanks and Regards,<br>
+                ${{ inputs.EMAIL_SENDER_NAME }}</p>
+                <footer style="font-size: 0.8rem; color: #ccc; height: 30px; line-height: 30px;">Generate by "Create Tag - CI" GitHub Action</footer>
+            </body>
 
-                    </html>
+            </html>
 

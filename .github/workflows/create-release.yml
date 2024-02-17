@@ -49,7 +49,7 @@ jobs:
       - name: Create release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repo: ${{ needs.prerequisite.outputs.repository }}
           tag_name: ${{ needs.prerequisite.outputs.tag }}
