@@ -110,6 +110,11 @@ jobs:
       #     echo "Version type: $TAG_VERSION_DEFAULT"
       #     echo "::set-output name=tag-version::$TAG_VERSION_DEFAULT"
 
+      - name: Setup Wrappid npm registry
+        run: |
+          npm config set @wrappid:registry https://npm.pkg.github.com/wrappid
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.WRAPPID_REGISTRY_TOKEN }}
+
       - name: ⬇️ Setup Project
         run: | 
          echo Installing Node Modules
