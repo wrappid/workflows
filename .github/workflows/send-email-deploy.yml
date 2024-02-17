@@ -7,6 +7,8 @@ on:
         type: string
       EMAIL_SENDER_NAME:      ## Optional
         type: string
+      PROJECT_HOSTED_URL:     ## Optional
+        type: string
     secrets:
       EMAIL_SERVER_ADDRESS:
         required: true
@@ -64,7 +66,7 @@ jobs:
 
               <p>Its time to hunt those bugs again 🐛<br>
                 We have deployed a new version of our ${{ github.event.repository.name }} project, ${{ steps.current-tag.outputs.tag }}. 🚀<br>
-                Start your hunt ${{ secrets.PROJECT_HOSTED_URL }}<br>
+                Start your hunt ${{ inputs.PROJECT_HOSTED_URL }}<br>
                 This version comes with some amazing new features and improvements that will make your experience even better.
                 You can check out the latest release details here https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/tag/${{ inputs.tag-version }}.
               </p>

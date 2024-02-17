@@ -10,6 +10,8 @@ on:
       EMAIL_SENDER_NAME:
         required: false
         type: string
+      PROJECT_HOSTED_URL:
+        type: string
     secrets:
       PAT:
         required: true
@@ -77,3 +79,4 @@ jobs:
       with:
         tag-version: ${{ needs.service-deploy.outputs.tag-version }}
         EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
+        PROJECT_HOSTED_URL: ${{ inputs.PROJECT_HOSTED_URL }}
