@@ -54,9 +54,9 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.AWS_STAGE_HOST }}       
-          username: ${{ secrets.AWS_STAGE_USER }}     
-          key: ${{ secrets.AWS_STAGE_SSH_KEY }}
+          host: ${{ secrets.REMOTE_HOST }}       
+          username: ${{ secrets.REMOTE_SSH_USER }}     
+          key: ${{ secrets.REMOTE_SSH_USER }}
           port: 22
           script: |
             sudo -u ec2-user curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/app-deploy.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
