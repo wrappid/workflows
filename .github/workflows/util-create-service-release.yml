@@ -1,5 +1,34 @@
 on:
     workflow_call:
+      inputs:
+        GIT_USER_NAME:
+          required: true
+          type: string
+        TOOLKIT_VERSION:
+          required: true
+          type: string
+        EMAIL_NOTIFY:
+          required: true
+          type: string
+          default: "true"
+        EMAIL_SENDER_NAME:
+          required: false
+          type: string
+      secrets:
+        PAT:
+          required: true
+        GIT_USER_EMAIL:
+          required: true
+        WRAPPID_REGISTRY_TOKEN:
+          required: true
+  ## Below secrets are required if EMAIL_NOTIFY is TRUE
+        EMAIL_SERVER_ADDRESS:
+        EMAIL_SERVER_PORT:
+        EMAIL_USER_ID:
+        EMAIL_USER_PASSWORD:
+        EMAIL_TO:
+        EMAIL_CC:     ## Optional
+        EMAIL_BCC:    ## Optional
 
 name: Create Service Release - CD
 
@@ -61,8 +90,8 @@ jobs:
       - name: 🛠 Setup gh and git
         run: |
           echo ${{secrets.PAT}} | gh auth login --with-token
-          git config user.name "${{ secrets.GHUSER_NAME }}"
-          git config user.email "${{ secrets.GHUSER_EMAIL }}"
+          git config user.name "${{ inputs.GIT_USER_NAME }}"
+          git config user.email "${{ secrets.GIT_USER_EMAIL }}"
 
 
 ## TODO
@@ -90,7 +119,7 @@ jobs:
          npm ci --omit-dev
 
       - name: Setup Wrappid
-        run: npm install -g @wrappid/toolkit@${{ secrets.TOOLKIT_VERSION }}
+        run: npm install -g @wrappid/toolkit@${{ inputs.TOOLKIT_VERSION }}
 
       - name: Check Wrappid Version
         run: wrappid --version
@@ -176,8 +205,14 @@ jobs:
       needs: create-release
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
-      secrets: inherit
       with:
-        # email-to: "${{ secrets.IDS }}"
-        # email-cc: "${{ secrets.MAINTAINER_ID }}"
         tag-version: ${{ needs.create-release.outputs.tag-version }}
+        EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
+      secrets:
+        EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+        EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
+        EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
+        EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        EMAIL_CC: ${{ secrets.EMAIL_CC }}       ## Optional
+        EMAIL_BCC: ${{ secrets.EMAIL_BCC }}     ## Optional
