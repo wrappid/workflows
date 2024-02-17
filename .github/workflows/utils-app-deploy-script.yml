@@ -39,7 +39,7 @@ jobs:
   call-send-email-deployed:
       needs: app-deploy
       permissions: write-all
-      uses: wrappid/workflows/.github/workflows/send-email-deploy.yml@main
+      uses: wrappid/workflows/.github/workflows/send-email-deploy.yml@v0.0.1
       secrets: inherit
       with:
         tag-version: ${{ needs.app-deploy.outputs.tag-version }}
