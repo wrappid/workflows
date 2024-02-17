@@ -3,23 +3,37 @@ on:
   workflow_call:
     inputs:
       tag-version:
-          required: true
-          type: string
+        required: true
+        type: string
+      EMAIL_SENDER_NAME:      ## Optional
+        type: string
+    secrets:
+      EMAIL_SERVER_ADDRESS:
+        required: true
+      EMAIL_SERVER_PORT:
+        required: true
+      EMAIL_USER_ID:
+        required: true
+      EMAIL_USER_PASSWORD:
+        required: true
+      EMAIL_TO:
+        required: true
+      EMAIL_CC:               ## Optional
+      EMAIL_BCC:              ## Optional
 
 jobs:
   send-email:
     name: Send Email
     runs-on: ubuntu-latest
     steps:
-
       - name: Sender Name configure
         id: sender-name
         run: |
-          if [[ -n "${{ secrets.SENDER_NAME }}" ]]; then
-            echo "SENDER_NAME=${{ secrets.SENDER_NAME }}" >> $GITHUB_ENV
+          if [[ -n "${{ inputs.EMAIL_SENDER_NAME }}" ]]; then
+              echo "SENDER_NAME=${{ inputs.EMAIL_SENDER_NAME }}" >> $GITHUB_ENV
           else
-            REPOSITORY_OWNER_NAME=${{ github.repository_owner }}
-            echo "SENDER_NAME=${REPOSITORY_OWNER_NAME^}" >> $GITHUB_ENV
+              REPOSITORY_OWNER_NAME=${{ github.repository_owner }}
+              echo "SENDER_NAME=${REPOSITORY_OWNER_NAME^}" >> $GITHUB_ENV
           fi
 
       ## TODO: USE EMAIL TEMPLATES
@@ -27,14 +41,15 @@ jobs:
       - name: 📧 Send mail
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
+          server_address: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+          server_port: ${{ secrets.EMAIL_SERVER_PORT }}
+          username: ${{ secrets.EMAIL_USER_ID }}
+          password: ${{ secrets.EMAIL_USER_PASSWORD }}
           secure: true
           from: ${{ env.SENDER_NAME }}
-          to: ${{ secrets.IDS }}
-          cc: ${{ secrets.MAINTAINER_ID }}
+          to: ${{ secrets.EMAIL_TO }}
+          cc: ${{ secrets.EMAIL_CC }}
+          bcc: ${{ secrets.EMAIL_BCC }}
           subject: Released - ${{ github.event.repository.name }} ${{ inputs.tag-version }}. 🚀
           html_body: |
             <html lang="en">
