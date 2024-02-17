@@ -2,6 +2,31 @@ name: App Deploy - CD
 
 on:
   workflow_call:
+    inputs:
+      EMAIL_NOTIFY:
+        required: true
+        type: string
+        default: "true"
+      EMAIL_SENDER_NAME:
+        required: false
+        type: string
+    secrets:
+      PAT:
+        required: true
+      REMOTE_HOST:
+         required: true
+      REMOTE_SSH_KEY:
+         required: true
+      REMOTE_SSH_USER:
+         required: true
+## Below secrets are required if EMAIL_NOTIFY is TRUE
+      EMAIL_SERVER_ADDRESS:
+      EMAIL_SERVER_PORT:
+      EMAIL_USER_ID:
+      EMAIL_USER_PASSWORD:
+      EMAIL_TO:
+      EMAIL_CC:     ## Optional
+      EMAIL_BCC:    ## Optional
 
 jobs:
   app-deploy:
@@ -38,8 +63,17 @@ jobs:
 
   call-send-email-deployed:
       needs: app-deploy
+      if: ${{ inputs.EMAIL_NOTIFY }} == true
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-deploy.yml@main
-      secrets: inherit
+      secrets:
+        EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+        EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
+        EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
+        EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        EMAIL_CC: ${{ secrets.EMAIL_CC }}       ## Optional
+        EMAIL_BCC: ${{ secrets.EMAIL_BCC }}     ## Optional
       with:
         tag-version: ${{ needs.app-deploy.outputs.tag-version }}
+        EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
