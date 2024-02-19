@@ -138,10 +138,6 @@ jobs:
       - name: Install zip
         run: sudo apt install zip -y
 
-      - name: Zip build
-        run: |
-          cd build/web
-          zip -r web-v${{ steps.extract-version.outputs.version }}.zip *
 
       - run: ls -l
 
