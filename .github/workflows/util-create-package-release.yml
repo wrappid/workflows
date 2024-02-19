@@ -130,7 +130,9 @@ jobs:
 
       - name: Find packaged name
         id: find-packaged-name
-        run: echo "packaged-name=$(find . -name "*.tgz" | xargs -I{} basename {})" >> GITHUB_OUTPUT
+        run: |
+          packaged_name=$(find . -name "*.tgz" | xargs -I{} basename {})
+          echo "packaged-name=$packaged_name" >> GITHUB_OUTPUT
 
       - name: Print file name of packaged artifact
         run: echo ${{ steps.find-packaged-name.outputs.packaged-name }}
