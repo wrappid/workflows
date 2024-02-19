@@ -1,5 +1,34 @@
 on:
-    workflow_call:
+  workflow_call:
+    inputs:
+      GIT_USER_NAME:
+        required: true
+        type: string
+      TOOLKIT_VERSION:
+        required: true
+        type: string
+      EMAIL_NOTIFY:
+        required: true
+        type: string
+        default: "true"
+      EMAIL_SENDER_NAME:
+        required: false
+        type: string
+    secrets:
+      PAT:
+        required: true
+      GIT_USER_EMAIL:
+        required: true
+      WRAPPID_REGISTRY_TOKEN:
+        required: true
+## Below secrets are required if EMAIL_NOTIFY is TRUE
+      EMAIL_SERVER_ADDRESS:
+      EMAIL_SERVER_PORT:
+      EMAIL_USER_ID:
+      EMAIL_USER_PASSWORD:
+      EMAIL_TO:
+      EMAIL_CC:     ## Optional
+      EMAIL_BCC:    ## Optional
 
 name: Create Package Release - CD
 
@@ -81,63 +110,30 @@ jobs:
       #     echo "Version type: $TAG_VERSION_DEFAULT"
       #     echo "::set-output name=tag-version::$TAG_VERSION_DEFAULT"
 
-## TODO: CHECKOUT TAG
-
+      - name: Extract version
+        id: extract-version
+        uses: Saionaro/extract-package-version@v1.0.6
 
       - name: ⬇️ Setup Project
         run: | 
          echo Installing Node Modules
          npm ci --omit-dev
 
-
-
-      - name: Setup Wrappid
-        run: npm install -g @wrappid/toolkit@${{ secrets.TOOLKIT_VERSION }}
-
-      - name: Check Wrappid Version
-        run: wrappid --version
-
-#       - name: Wrappid setup mobile
-#         run: |
-#           gh auth status
-#           echo Starting Setup.........................
-#           wrappid setup mobile --env=stage
-
-#       - name: Setup JDK 11
-#         uses: actions/setup-java@v3
-#         with:
-#           java-version: '11'
-#           distribution: 'temurin'
-#           cache: gradle
-# #           cache-dependency-path: /.wrappid/runtime/mobile/android/
-
-#       - name: Change Permission of Gradle
-#         run: cd .wrappid/runtime/mobile/android/ && chmod +x gradlew
-
-#       - name: Build Wrappid android
-#         run: |
-#           gh auth status
-#           echo Starting Build.........................
-#           wrappid build android
-
-      - name: Wrappid Setup Web
-        run: |
-          gh auth status
-          echo Starting Build.........................
-          wrappid setup web --env=stage
-
-      - name: Build wrappid web
-        run: |
-          gh auth status
-          echo Starting Build.........................
-          wrappid build web
-
-      - name: Extract version
-        id: extract_version
-        uses: Saionaro/extract-package-version@v1.0.6
-
       - name: Print version
-        run: echo ${{ steps.extract_version.outputs.version }}
+        run: echo ${{ steps.extract-version.outputs.version }}
+
+      - name: 🏗️ Build wrappid ${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: 📦 Create Package
+        run: npm pack ./dist/
+
+      - name: Find packaged name
+        id: find-packaged-name
+        run: echo "packaged-name=$(find . -name "*.tgz" | xargs -I{} basename {})" >> GITHUB_OUTPUT
+
+      - name: Print file name of packaged artifact
+        run: echo ${{ steps.find-packaged-name.outputs.packaged-name }}
 
       - name: Install zip
         run: sudo apt install zip -y
@@ -145,29 +141,12 @@ jobs:
       - name: Zip build
         run: |
           cd build/web
-          zip -r web-v${{ steps.extract_version.outputs.version }}.zip *
+          zip -r web-v${{ steps.extract-version.outputs.version }}.zip *
 
       - run: ls -l
-
-      - name: Move Web zip to root
-        run: mv build/web/web-v${{ steps.extract_version.outputs.version }}.zip web-v${{ steps.extract_version.outputs.version }}.zip
-
-      # - name: Move apk to root
-      #   run: mv build/mobile/android/app-debug.apk android-v${{ steps.extract_version.outputs.version }}.apk
-
-      - run: ls -l
-
-      - name: Get wrappid logs
-        run: cp $(npm root -g)/@wrappid/logs/logs.log wrappid-logs-v${{ steps.extract_version.outputs.version }}.log
-
-      # - name: Get tags
-      #   run: git fetch --tags origin
-
-      # - name: Create tag
-      #   run: git tag v${{ steps.extract_version.outputs.version }} && git push origin v${{ steps.extract_version.outputs.version }}
 
       - name: Generate Release notes
-        run: bash .github/scripts/release_notes.sh
+        run: curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/release_notes.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
 
       - name: Create Release
         id: create_release
@@ -175,60 +154,35 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT}} # Personal Access Token
         with:
-          tag_name: v${{ steps.extract_version.outputs.version }}
-          release_name: v${{ steps.extract_version.outputs.version }}
+          tag_name: v${{ steps.extract-version.outputs.version }}
+          release_name: v${{ steps.extract-version.outputs.version }}
           body_path: ./RELEASE_NOTES.md
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset Web
-        id: upload-web-release-asset 
+      - name: Upload Release Asset Package
+        id: upload-package-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAT}} # Personal Access Token
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./web-v${{ steps.extract_version.outputs.version }}.zip
-          asset_name: "web-v${{ steps.extract_version.outputs.version }}.zip"
+          asset_path: ./${{ steps.find-packaged-name.outputs.packaged-name }}
+          asset_name: ${{ steps.find-packaged-name.outputs.packaged-name }}
           asset_content_type: application/zip
-
-      # - name: Upload Release Asset Android
-      #   id: upload-android-release-asset 
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.PAT }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-      #     asset_path: ./android-v${{ steps.extract_version.outputs.version }}.apk
-      #     asset_name: "android-v${{ steps.extract_version.outputs.version }}.apk"
-      #     asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload Release Asset Wrappid-Logs
-        id: upload-log-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./wrappid-logs-v${{ steps.extract_version.outputs.version }}.log
-          asset_name: "wrappid-logs-v${{ steps.extract_version.outputs.version }}.log"
-          asset_content_type: text/plain
-
-
-      # - name: 🚀 Create Release
-      #   if: ${{ steps.check-tag.outputs.release-exists == 'failure' }}
-      #   id: create_release
-      #   run: gh release create ${{ steps.latest-tag.outputs.tag }} *.tgz --title ${{ steps.latest-tag.outputs.tag }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
   call-send-email-released:
       needs: create-release
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
-      secrets: inherit
       with:
-        # email-to: "${{ secrets.IDS }}"
-        # email-cc: "${{ secrets.MAINTAINER_ID }}"
         tag-version: ${{ needs.create-release.outputs.tag-version }}
+        EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
+      secrets:
+        EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+        EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
+        EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
+        EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        EMAIL_CC: ${{ secrets.EMAIL_CC }}       ## Optional
+        EMAIL_BCC: ${{ secrets.EMAIL_BCC }}     ## Optional
