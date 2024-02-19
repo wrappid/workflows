@@ -28,7 +28,7 @@ env:
 jobs:
   package-publish:
     runs-on: ubuntu-latest
-    name: Service Deploy
+    name: Package Publish
     outputs:
       tag-version: ${{ steps.current-tag.outputs.tag }}
 
