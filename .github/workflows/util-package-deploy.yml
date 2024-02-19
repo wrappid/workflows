@@ -13,7 +13,7 @@ on:
     secrets:
       PAT:
         required: true
-      WRAPPID_PUBLISH_TOKEN
+      WRAPPID_PUBLISH_TOKEN:
         required: true
 ## Below secrets are required if EMAIL_NOTIFY is TRUE
       EMAIL_SERVER_ADDRESS:
