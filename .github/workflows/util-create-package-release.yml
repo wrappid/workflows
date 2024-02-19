@@ -132,14 +132,10 @@ jobs:
         id: find-packaged-name
         run: |
           packaged_name=$(find . -name "*.tgz" | xargs -I{} basename {})
-          echo "packaged-name=$packaged_name" >> GITHUB_OUTPUT
+          echo "::set-output name=packaged-name::$packaged_name"
 
       - name: Print file name of packaged artifact
         run: echo ${{ steps.find-packaged-name.outputs.packaged-name }}
-
-      - name: Install zip
-        run: sudo apt install zip -y
-
 
       - run: ls -l
 
