@@ -13,12 +13,8 @@ on:
     secrets:
       PAT:
         required: true
-      REMOTE_HOST:
-         required: true
-      REMOTE_SSH_KEY:
-         required: true
-      REMOTE_SSH_USER:
-         required: true
+      WRAPPID_PUBLISH_TOKEN
+        required: true
 ## Below secrets are required if EMAIL_NOTIFY is TRUE
       EMAIL_SERVER_ADDRESS:
       EMAIL_SERVER_PORT:
@@ -37,11 +33,21 @@ jobs:
       tag-version: ${{ steps.current-tag.outputs.tag }}
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT }}
           fetch-depth: 0
+          
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://npm.pkg.github.com/wrappid
+          token: ${{ secrets.WRAPPID_PUBLISH_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          NODE_AUTH_TOKEN: ${{ secrets.WRAPPID_PUBLISH_TOKEN }}
 
       - name: Get Current Tag
         id: current-tag
@@ -54,6 +60,10 @@ jobs:
 
       - name: Download latest release
         run: gh release download --pattern "wrappid*.tgz" -R wrappid/${{ github.event.repository.name }}
+
+      - name: Publish package
+        run: npm run publish
+
 
   call-send-email-deployed:
       needs: package-publish
