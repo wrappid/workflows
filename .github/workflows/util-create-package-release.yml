@@ -39,6 +39,7 @@ jobs:
     permissions: write-all
     outputs:
      tag-version: ${{ steps.tag.outputs.tag }}
+     release-exist: ${{ steps.check_release.outputs.release_exists }}
     steps:
   
       - name: Check if tag is provided
@@ -72,13 +73,35 @@ jobs:
       - name: Print final tag to checkout
         run: echo ${{ steps.tag.outputs.tag }}
 
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          TAG_NAME=${{ steps.tag.outputs.tag }}
+          gh release view ${TAG_NAME} &>/dev/null
+          if [[ $? -eq 0 ]]; then
+            echo "::set-output name=release_exists::true"
+          else
+            echo "::set-output name=release_exists::false"
+          fi
+      
+      - name: Print release status
+        run: |
+          if [[ "${{ steps.check_release.outputs.release_exists }}" == "false" ]]; then
+            echo "Release exists for tag ${{ steps.tag.outputs.tag }}."
+          else
+            echo "Release does not exist for tag ${{ steps.tag.outputs.tag }}."
+          fi
+
       - name: 🛒 Checkout Repository
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.tag.outputs.tag }}
           token: ${{ secrets.PAT }}
        
       - name: 🛠 Set up Node.js
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         uses: actions/setup-node@v4
         with:
           node-version: 16
@@ -88,6 +111,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN }} 
           
       - name: 🛠 Setup gh and git
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         run: |
           echo ${{secrets.PAT}} | gh auth login --with-token
           git config user.name "${{ secrets.GHUSER_NAME }}"
@@ -98,51 +122,50 @@ jobs:
 # gh release view v0.0.409 --json name,tagName,createdAt,publishedAt --jq .name
 # if release name not specified, takes latest
 
-      # - name: 👀 Process Inputs
-      #   id: tag-version-input
-      #   run: |
-      #     if [ -z "${{ github.event.inputs.tag-name }}" ]; then
-      #       echo "Input Blank. \nLatest Tag will be used for release creation"
-      #       export TAG_VERSION_DEFAULT=""
-      #     else
-      #       export TAG_VERSION_DEFAULT="${{ github.event.inputs.tag-name }}"
-      #     fi
-      #     echo "Version type: $TAG_VERSION_DEFAULT"
-      #     echo "::set-output name=tag-version::$TAG_VERSION_DEFAULT"
-
       - name: Extract version
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         id: extract-version
         uses: Saionaro/extract-package-version@v1.0.6
 
       - name: ⬇️ Setup Project
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         run: | 
          echo Installing Node Modules
          npm ci --omit-dev
 
       - name: Print version
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         run: echo ${{ steps.extract-version.outputs.version }}
 
       - name: 🏗️ Build wrappid ${{ github.event.repository.name }}
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         run: npm run build
 
       - name: 📦 Create Package
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         run: npm pack ./dist/
 
       - name: Find packaged name
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         id: find-packaged-name
         run: |
           packaged_name=$(find . -name "*.tgz" | xargs -I{} basename {})
           echo "::set-output name=packaged-name::$packaged_name"
 
       - name: Print file name of packaged artifact
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         run: echo ${{ steps.find-packaged-name.outputs.packaged-name }}
 
-      - run: ls -l
+      - name: List files
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
+        run: ls -l
 
       - name: Generate Release notes
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         run: curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/release_notes.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
 
       - name: Create Release
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -155,6 +178,7 @@ jobs:
           prerelease: false
 
       - name: Upload Release Asset Package
+        if: ${{ steps.check_release.outputs.release_exists }} == "false"
         id: upload-package-release-asset 
         uses: actions/upload-release-asset@v1
         env:
@@ -167,6 +191,7 @@ jobs:
 
   call-send-email-released:
       needs: create-release
+      if: ${{ needs.create-release.outputs.release-exist }} == "false"
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
       with:
