@@ -78,7 +78,7 @@ jobs:
         id: check_release
         run: |
           TAG_NAME=${{ steps.tag.outputs.tag }}
-          gh release view ${TAG_NAME} &>/dev/null
+          gh release view ${{ steps.tag.outputs.tag }} &>/dev/null
           if [[ $? -eq 0 ]]; then
             echo "::set-output name=release_exists::true"
           else
