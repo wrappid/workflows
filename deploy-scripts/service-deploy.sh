@@ -58,14 +58,14 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "COPYING NEW ARTIFICAT FROM "$HOME"/temp/ TO "$HOME"/$REPONAME..."
-cp $HOME/temp/*.zip $HOME/$REPONAME/
+cp $HOME/temp/service*.zip $HOME/$REPONAME/
 echo "========================="
 echo "COPIED NEW ARTIFACT."
 echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "UNZIPPING COPIED ARTIFACT ..."
-unzip *.zip > /dev/null
+unzip service*.zip > /dev/null
 echo "========================="
 echo "UNZIPPED COPIED ARTIFACT"
 echo "SHOW ALL FILES:"

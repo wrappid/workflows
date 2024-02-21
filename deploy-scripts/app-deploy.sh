@@ -59,7 +59,7 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "COPYING NEW ARTIFICAT FROM "$HOME"/temp/ TO "$HOME"/$REPONAME..."
-sudo cp $HOME/temp/*.zip $HOME/$REPONAME/
+sudo cp $HOME/temp/web*.zip $HOME/$REPONAME/
 echo "========================="
 echo "COPIED NEW ARTIFACT."
 echo "SHOW ALL FILES:"
