@@ -77,8 +77,9 @@ jobs:
       - name: Check if release exists
         id: check_release
         run: |
-          RELEASE_EXISTS=$(gh release view ${{ steps.tag.outputs.tag }} || echo "")
-          gh release view ${{ steps.tag.outputs.tag }} # &>/dev/null
+          TAG_NAME= ${{ steps.tag.outputs.tag }}
+          echo $(gh release view $TAG_NAME --json tagName) > tempTagName.json
+          RELEASE_EXISTS=$(cat tempTagName.json | jq .tagName)
           if [ -z "$RELEASE_EXISTS" ]; then
             echo "::set-output name=release_exists::false"
           else
