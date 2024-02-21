@@ -89,14 +89,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT }}
 
-      - name: Print release status
-        run: |
-          if [[ "${{ steps.check_release.outputs.release_exists }}" == "yes" ]]; then
-            echo "Release exists for tag ${{ steps.tag.outputs.tag }}."
-          else
-            echo "Release does not exist for tag ${{ steps.tag.outputs.tag }}."
-          fi
-
   create-release:
     needs: check-pre-requisites
     name: Create Release
@@ -184,7 +176,7 @@ jobs:
 
   call-send-email-released:
       needs: [create-release, check-pre-requisites]
-      if: ${{ needs.check-pre-requisites.outputs.release-exist }} == 'no'
+      if: needs.check-pre-requisites.outputs.release-exist == 'no'
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
       with:
