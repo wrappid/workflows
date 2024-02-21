@@ -100,7 +100,7 @@ jobs:
   create-release:
     needs: check-pre-requisites
     name: Create Release
-    if: ${{ needs.check-pre-requisites.outputs.release-exist }} == "no"
+    if: ${{ needs.check-pre-requisites.outputs.release-exist }} == 'no'
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
@@ -183,8 +183,8 @@ jobs:
           asset_content_type: application/zip
 
   call-send-email-released:
-      needs: create-release
-      if: ${{ needs.check-pre-requisites.outputs.release-exist }} == "no"
+      needs: [create-release, check-pre-requisites]
+      if: ${{ needs.check-pre-requisites.outputs.release-exist }} == 'no'
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
       with:
