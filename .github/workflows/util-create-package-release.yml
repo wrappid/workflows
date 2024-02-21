@@ -98,7 +98,9 @@ jobs:
           fi
 
   create-release:
+    needs: check-pre-requisites
     name: Create Release
+    if: ${{ needs.check-pre-requisites.outputs.release-exist }} == "no"
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
