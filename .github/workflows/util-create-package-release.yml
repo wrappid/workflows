@@ -89,6 +89,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT }}
 
+# TODO 1: DIFFERENT JOB TO CREATE BUILD AND BUILD ARTIFACT.
+
   create-release:
     needs: check-pre-requisites
     name: Create Release
@@ -176,7 +178,7 @@ jobs:
 
   call-send-email-released:
       needs: [create-release, check-pre-requisites]
-      if: needs.check-pre-requisites.outputs.release-exist == 'no'
+      if: needs.check-pre-requisites.outputs.release-exist == 'no' && inputs.EMAIL_NOTIFY == 'true'
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
       with:

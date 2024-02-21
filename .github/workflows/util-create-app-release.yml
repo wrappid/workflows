@@ -33,14 +33,16 @@ on:
 name: Create App Release - CD
 
 jobs:
-  create-release:
-    name: Create Release
+
+  check-pre-requisites:
+    name: Check Pre-requisites
     runs-on: ubuntu-latest
     permissions: write-all
     outputs:
-     tag-version: ${{ steps.tag.outputs.tag }}
+      tag-version: ${{ steps.tag.outputs.tag }}
+      release-exist: ${{ steps.check_release.outputs.release_exists }}
+
     steps:
-  
       - name: Check if tag is provided
         id: check_tag
         run: echo ::set-output name=tag_exists::$(if [ -n "${{ github.event.inputs.tag-name }}" ]; then echo "true"; else echo "false"; fi)
@@ -72,10 +74,37 @@ jobs:
       - name: Print final tag to checkout
         run: echo ${{ steps.tag.outputs.tag }}
 
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          TAG_NAME=${{ steps.tag.outputs.tag }}
+          echo $(gh release view $TAG_NAME --json tagName) > tempTagName.json
+          RELEASE_EXISTS=$(cat tempTagName.json | jq .tagName)
+          if [ -z "$RELEASE_EXISTS" ]; then
+            echo "::set-output name=release_exists::no"
+          else
+            echo "::set-output name=release_exists::yes"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.PAT }}
+
+# TODO 1: DIFFERENT JOB TO CREATE BUILD AND BUILD ARTIFACT.
+# TODO 2: EACH BUILD PARALLEL JOB
+# TODO 3: OPTION TO SKIP PARTICULAR BUILD
+
+  create-release:
+    needs: check-pre-requisites
+    name: Create Release
+    if: needs.check-pre-requisites.outputs.release-exist == 'no'
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+
       - name: 🛒 Checkout Tag
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.tag.outputs.tag }}
+          ref: ${{ needs.create-release.outputs.tag-version }}
           token: ${{ secrets.PAT }}
 
       - name: 🛠 Set up Node.js
@@ -92,23 +121,6 @@ jobs:
           echo ${{secrets.PAT}} | gh auth login --with-token
           git config user.name "${{ inputs.GIT_USER_NAME}}"
           git config user.email "${{ secrets.GIT_USER_EMAIL }}"
-
-
-## TODO
-# gh release view v0.0.409 --json name,tagName,createdAt,publishedAt --jq .name
-# if release name not specified, takes latest
-
-      # - name: 👀 Process Inputs
-      #   id: tag-version-input
-      #   run: |
-      #     if [ -z "${{ github.event.inputs.tag-name }}" ]; then
-      #       echo "Input Blank. \nLatest Tag will be used for release creation"
-      #       export TAG_VERSION_DEFAULT=""
-      #     else
-      #       export TAG_VERSION_DEFAULT="${{ github.event.inputs.tag-name }}"
-      #     fi
-      #     echo "Version type: $TAG_VERSION_DEFAULT"
-      #     echo "::set-output name=tag-version::$TAG_VERSION_DEFAULT"
 
       - name: Setup Wrappid npm registry
         run: |
@@ -240,18 +252,9 @@ jobs:
           asset_name: "wrappid-logs-v${{ steps.extract_version.outputs.version }}.log"
           asset_content_type: text/plain
 
-## TEST SNIPPET FOR TODO:
-      # - name: 🚀 Create Release
-      #   if: ${{ steps.check-tag.outputs.release-exists == 'failure' }}
-      #   id: create_release
-      #   run: gh release create ${{ steps.latest-tag.outputs.tag }} *.tgz --title ${{ steps.latest-tag.outputs.tag }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
   call-send-email-released:
-      needs: create-release
-      if: ${{ inputs.EMAIL_NOTIFY }} == true
+      needs: [create-release, check-pre-requisites]
+      if: needs.check-pre-requisites.outputs.release-exist == 'no' && inputs.EMAIL_NOTIFY == 'true'
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
       with:
