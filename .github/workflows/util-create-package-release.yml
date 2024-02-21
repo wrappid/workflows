@@ -84,7 +84,8 @@ jobs:
           else
             echo "::set-output name=release_exists::true"
           fi
-
+        env:
+          GH_TOKEN: ${{ secrets.PAT }}
       - name: Print release status
         run: |
           if [[ "${{ steps.check_release.outputs.release_exists }}" == "false" ]]; then
