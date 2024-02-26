@@ -26,14 +26,14 @@ echo "CHANGED DIRECTORY. \nCURRENT WORKING DIRECTORY: "$PWD""
 echo "========================="
 echo "CLEANING UP PREVIOUS RELEASE ARTIFACT..."
 echo $PWD
-rm -rf *
+rm -rf service*.zip
 echo "========================="
 echo "CLEANED PREVIOUS RELEASE ARTIFACT."
 echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "STARTING DOWNLOAD OF $REPONAME ..."
-gh release download --pattern "*.zip" -R $OWNER_NAME/$REPONAME
+gh release download --pattern "service*.zip" -R $OWNER_NAME/$REPONAME
 echo "========================="
 echo "DOWNLOADED FILES:"
 ls -al
