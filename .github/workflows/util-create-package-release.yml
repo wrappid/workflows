@@ -102,7 +102,7 @@ jobs:
       - name: 🛒 Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.create-release.outputs.tag-version }}
+          ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
           token: ${{ secrets.PAT }}
 
       - name: 🛠 Set up Node.js

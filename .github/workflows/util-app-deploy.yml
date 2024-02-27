@@ -87,7 +87,7 @@ jobs:
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-failure.yml@main
       with:
-        tag-version: ${{ needs.check-pre-requisites.outputs.tag-version }}
+        tag-version: ${{ needs.app-deploy.outputs.tag-version }}
         EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
       secrets:
         EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}

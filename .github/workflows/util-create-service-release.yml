@@ -101,7 +101,7 @@ jobs:
       - name: 🛒 Checkout Tag
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.create-release.outputs.tag-version }}
+          ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
           token: ${{ secrets.PAT }}
        
       - name: 🛠 Set up Node.js
@@ -217,7 +217,7 @@ jobs:
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
       with:
-        tag-version: ${{ needs.create-release.outputs.tag-version }}
+        tag-version: ${{ needs.check-pre-requisites.outputs.tag-version }}
         EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
       secrets:
         EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
