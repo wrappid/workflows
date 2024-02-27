@@ -256,7 +256,7 @@ jobs:
 
       - run: ls -l
 
-      - name: Upload Android Artifact
+      - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
         with:
             name: web-${{ needs.check-pre-requisites.outputs.tag-version }}
