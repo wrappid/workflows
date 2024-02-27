@@ -265,7 +265,7 @@ jobs:
               web-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
 
   create-release:
-    needs: check-pre-requisites
+    needs: [check-pre-requisites, build-web, build-android]
     name: Create Release
     if: needs.check-pre-requisites.outputs.release-exist == 'no'
     runs-on: ubuntu-latest
