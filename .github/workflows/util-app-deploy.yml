@@ -21,6 +21,8 @@ on:
          required: true
       REMOTE_SSH_USER:
          required: true
+      REMOTE_PATH_OF_PROJECT_DEPLOYMENT_PATH:
+         required: true
 ## Below secrets are required if EMAIL_NOTIFY is TRUE
       EMAIL_SERVER_ADDRESS:
       EMAIL_SERVER_PORT:
@@ -61,7 +63,20 @@ jobs:
           key: ${{ secrets.REMOTE_SSH_KEY }}
           port: 22
           script: |
-            sudo -u ec2-user curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/app-deploy.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
+            sudo -u ${{ secrets.REMOTE_SSH_USER }} curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/app-deploy.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
+      
+      - name: Verify Deployment
+        run: |
+          URL="${{ inputs.PROJECT_HOSTED_URL }}"
+          response_code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+
+          echo "Response code: $response_code"
+
+          if [ "$response_code" -ne 200 ]; then
+              echo "URL is not accessible."
+              exit 1
+          fi
+
 
   call-send-email-deployed:
       needs: app-deploy
