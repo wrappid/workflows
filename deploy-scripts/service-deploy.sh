@@ -4,8 +4,10 @@
 #               : antaghosh@protonmail.com
 # Description   : This script downloads latest release from  github ($OWNER_NAME/$REPONAME),
 #                 extracts it and restarts pm2 service called - WrappidService
-OWNER_NAME=$1
-REPONAME=$2
+
+PROJECT_DEPLOYMENT_PATH=$1
+OWNER_NAME=$2
+REPONAME=$3
 
 create_folder_if_not_exists() {
     folder_path="$1"
@@ -18,15 +20,15 @@ create_folder_if_not_exists() {
 
 echo "$REPONAME-DEPLOY SCRIPT STARTED."
 echo "========================="
-echo "CHANGING WORKING DIRECTORY TO "$HOME"/temp TO DOWNLOAD LATEST RELEASE OF $REPONAME."
-create_folder_if_not_exists "$HOME/temp"
-cd $HOME/temp
-echo "========================="
-echo "CHANGED DIRECTORY. \nCURRENT WORKING DIRECTORY: "$PWD""
-echo "========================="
+echo "CHANGING WORKING DIRECTORY TO $PROJECT_DEPLOYMENT_PATH/temp TO DOWNLOAD LATEST RELEASE OF $REPONAME."
+create_folder_if_not_exists "$PROJECT_DEPLOYMENT_PATH/temp"
 echo "CLEANING UP PREVIOUS RELEASE ARTIFACT..."
-echo $PWD
-rm -rf service*.zip
+echo "$PROJECT_DEPLOYMENT_PATH/temp/"
+sudo rm -rf "$PROJECT_DEPLOYMENT_PATH/temp/service*.zip"
+echo "========================="
+cd "$PROJECT_DEPLOYMENT_PATH/temp" || exit
+echo "========================="
+echo "CHANGED DIRECTORY. \nCURRENT WORKING DIRECTORY: ""$PWD"""
 echo "========================="
 echo "CLEANED PREVIOUS RELEASE ARTIFACT."
 echo "SHOW ALL FILES:"
@@ -42,23 +44,24 @@ echo "STARTING SETUP PROCESS OF NEW DOWNLOADED $REPONAME"
 echo "========================="
 echo "CURRENT WORKING DIRECTORY: " $PWD
 echo "========================="
-echo "CHANGING WORKING DIRECTORY TO "$HOME"/$REPONAME"
-create_folder_if_not_exists "$HOME/$REPONAME"
-cd $HOME/$REPONAME
+create_folder_if_not_exists "$PROJECT_DEPLOYMENT_PATH/$REPONAME"
 echo "========================="
 echo "SHOW ALL FILES:"
-ls -al
-echo "========================="
+ls -al 
 echo "CLEANING UP OLD SETUP OF $REPONAME ..."
-echo $PWD
-rm -rf *
+echo $PROJECT_DEPLOYMENT_PATH/$REPONAME/
+sudo rm -rf $PROJECT_DEPLOYMENT_PATH/$REPONAME/*
 echo "========================="
 echo "CLEANED OLD SETUP OF $REPONAME."
+echo "========================="
+echo "CHANGING WORKING DIRECTORY TO ""$PROJECT_DEPLOYMENT_PATH""/$REPONAME"
+cd "$PROJECT_DEPLOYMENT_PATH"/"$REPONAME" || exit
+echo "========================="
 echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
-echo "COPYING NEW ARTIFICAT FROM "$HOME"/temp/ TO "$HOME"/$REPONAME..."
-cp $HOME/temp/service*.zip $HOME/$REPONAME/
+echo "COPYING NEW ARTIFICAT FROM ""$PROJECT_DEPLOYMENT_PATH""/temp/ TO ""$PROJECT_DEPLOYMENT_PATH""/$REPONAME..."
+sudo cp $PROJECT_DEPLOYMENT_PATH/temp/service*.zip "$PROJECT_DEPLOYMENT_PATH"/"$REPONAME"/
 echo "========================="
 echo "COPIED NEW ARTIFACT."
 echo "SHOW ALL FILES:"
