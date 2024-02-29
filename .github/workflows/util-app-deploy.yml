@@ -67,6 +67,7 @@ jobs:
       
       - name: Verify Deployment
         run: |
+          sleep 10
           URL="${{ inputs.PROJECT_HOSTED_URL }}"
           response_code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
 
