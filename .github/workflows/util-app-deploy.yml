@@ -70,7 +70,7 @@ jobs:
           port: 22
           script: |
             source ~/.bashrc
-            echo "decision=$(sudo -u ${{ secrets.REMOTE_SSH_USER }} curl -o- -s https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/deploy_decider.sh | bash -s ${{ steps.generate-environment-variable.outputs.environment_variable }} ${{ steps.current-tag.outputs.tag }})" >> $GITHUB_OUTPUT
+            decision=$(sudo -u ${{ secrets.REMOTE_SSH_USER }} curl -o- -s https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/deploy_decider.sh | bash -s ${{ steps.generate-environment-variable.outputs.environment_variable }} ${{ steps.current-tag.outputs.tag }})
             source ~/.bashrc
             if [ "$decision" = "FAIL" ]; then
                 echo "Decision is FAIL. Exiting."
