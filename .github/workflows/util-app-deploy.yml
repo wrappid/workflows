@@ -63,8 +63,7 @@ jobs:
           key: ${{ secrets.REMOTE_SSH_KEY }}
           port: 22
           script: |
-            sudo -u ${{ secrets.REMOTE_SSH_USER }} curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/app-deploy.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
-      
+            sudo -u ${{ secrets.REMOTE_SSH_USER }} curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/deploy-scripts/app-deploy.sh | bash -s ${{ secrets.REMOTE_PATH_OF_PROJECT_DEPLOYMENT_PATH }} ${{ github.repository_owner }} ${{ github.event.repository.name }}
       - name: Verify Deployment
         run: |
           sleep 10
