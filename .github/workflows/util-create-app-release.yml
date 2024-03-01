@@ -85,6 +85,7 @@ jobs:
             echo "::set-output name=release_exists::no"
           else
             echo "::set-output name=release_exists::yes"
+            exit 1
           fi
         env:
           GH_TOKEN: ${{ secrets.PAT }}
@@ -374,7 +375,7 @@ jobs:
 
   call-send-email-failure:
       needs: [ check-pre-requisites, create-release ]
-      if: always() && needs.create-release.result == 'failure'
+      if: always() && ( needs.check-pre-requisites.result == 'failure' || needs.create-release.result == 'failure')
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-failure.yml@main
       with:
