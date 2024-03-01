@@ -238,7 +238,7 @@ jobs:
         run: |
           gh auth status
           echo Starting Build.........................
-          wrappid build Web
+          wrappid build web
 
       - name: Zip build
         run: |
