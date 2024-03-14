@@ -118,7 +118,7 @@ jobs:
 
         - name: Find relative repository URL
           id: repo_url
-          run: echo "repository_url=$(${{ github.repository }})" >> "$GITHUB_OUTPUT"
+          run: echo "repository_url=${{ github.repository }}" >> "$GITHUB_OUTPUT"
 
         - name: Update template version
           if: steps.repo_url.outputs.repository_url == ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
