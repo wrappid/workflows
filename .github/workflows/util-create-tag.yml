@@ -116,10 +116,24 @@ jobs:
         - name: Prepare for commit
           run: rm -f .gitignore
 
+        - name: Find relative repository URL
+          id: repo_url
+          run: echo "repository_url=$(${{ github.repository_owner }}/${{ github.repository }})" >> "$GITHUB_OUTPUT"
+
+        - name: Update template version
+          if: steps.repo_url.outputs.repository_url == ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
+          run: | 
+            # node custom-tag.js ${{ steps.release-type-input.outputs.version_type }}
+            curl -sSL- https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/wrappid-tag.js > __custom-tag.js
+            node __custom-tag.js ${{ steps.release-type-input.outputs.version_type }}
+            rm __custom-tag.js
+
+
         - name: ⬆️ Update version
-          run:  npm run release -- ${{ steps.release-type-input.outputs.version_type}}
-  
-  
+          if: steps.repo_url.outputs.repository_url != ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
+          run:  npm run release -- ${{ steps.release-type-input.outputs.version_type }}
+
+
         - name: 🚀 Update remote repository
           run: git push --follow-tags origin development
 
