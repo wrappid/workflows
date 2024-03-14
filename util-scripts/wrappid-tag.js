@@ -1,3 +1,4 @@
+const { exec } = require("child_process");
 const { readFileSync, writeFileSync } = require("fs");
 
 const standardVersion = require("standard-version");
@@ -47,10 +48,62 @@ async function prepareVersion(options = {}) {
     writeFileSync(".wrappid/wrappid.meta.json", JSON.stringify(wrappidMeta, null, 2));
 
     // Use standard-version internally
-    await standardVersion({ silent: true, commitAll: true });
+    await standardVersion({ skip: { commit: true, tag: true } });
+    
+    await new Promise((resolve, reject) => {
+      exec("npm i", (error, stdout, stderr) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Error running npm installation: ${error.message}`);
+          reject(error);
+          return;
+        }
+        if (stderr) {
+          // eslint-disable-next-line no-console
+          console.error(`Error running npm installation: ${stderr}`);
+          reject(stderr);
+          return;
+        }
+        resolve();
+      });
+    });
+    // create commit message
+    await new Promise((resolve, reject) => {
+      exec("bash commit-message.sh " + newVersion, (error, stdout, stderr) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Error generating commit message: ${error.message}`);
+          reject(error);
+          return;
+        }
+        if (stderr) {
+          // eslint-disable-next-line no-console
+          console.error(`Error generating commit message: ${stderr}`);
+          reject(stderr);
+          return;
+        }
+        resolve();
+      });
+    });
 
-    // Create a git tag using the new wrTemplateVersion
-    // await exec(`git tag v${newVersion}`);
+    // Stage the wrappid.meta.json file
+    await new Promise((resolve, reject) => {
+      exec("git add ./package.json ./package-lock.json ./.wrappid/wrappid.meta.json ./CHANGELOG.md 2>/dev/null && git commit -F commit-message.txt && git tag v" + newVersion, (error, stdout, stderr) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Error staging wrappid.meta.json: ${error.message}`);
+          reject(error);
+          return;
+        }
+        if (stderr) {
+          // eslint-disable-next-line no-console
+          console.error(`Error staging wrappid.meta.json: ${stderr}`);
+          reject(stderr);
+          return;
+        }
+        resolve();
+      });
+    });
 
     // eslint-disable-next-line no-console
     console.log(`Successfully created tag: v${newVersion}`);
@@ -64,6 +117,7 @@ async function prepareVersion(options = {}) {
 // Parse command-line arguments
 const args = process.argv.slice(2);
 
+// eslint-disable-next-line no-console
 console.log("Command-line arguments:", args);
 
 const options = {};
@@ -81,6 +135,7 @@ for (let i = 0; i < args.length; i += 2) {
   }
 }
 
+// eslint-disable-next-line no-console
 console.log("Parsed options:", options);
 
 prepareVersion(options);

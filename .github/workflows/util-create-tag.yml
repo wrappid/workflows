@@ -123,9 +123,11 @@ jobs:
         - name: Update template version
           if: steps.repo_url.outputs.repository_url == ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
           run: | 
-            curl -sSL https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/wrappid-tag.js > __wrappid-tag.js
-            node __wrappid-tag.js ${{ steps.release-type-input.outputs.version_type }}
-            rm __wrappid-tag.js
+            curl -sSL https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/wrappid-tag.js > wrappid-tag.js
+            curl -sSL https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/commit-message.sh > commit-message.sh
+            node wrappid-tag.js ${{ steps.release-type-input.outputs.version_type }}
+            rm -f wrappid-tag.js
+            rm -f commit-message.*
 
 
         - name: ⬆️ Update version
