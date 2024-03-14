@@ -47,7 +47,7 @@ async function prepareVersion(options = {}) {
     writeFileSync(".wrappid/wrappid.meta.json", JSON.stringify(wrappidMeta, null, 2));
 
     // Use standard-version internally
-    await standardVersion({ /* silent: true */ });
+    await standardVersion({ silent: true, commitAll: true });
 
     // Create a git tag using the new wrTemplateVersion
     // await exec(`git tag v${newVersion}`);

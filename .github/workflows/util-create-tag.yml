@@ -123,7 +123,6 @@ jobs:
         - name: Update template version
           if: steps.repo_url.outputs.repository_url == ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
           run: | 
-            # node custom-tag.js ${{ steps.release-type-input.outputs.version_type }}
             curl -sSL https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/wrappid-tag.js > __wrappid-tag.js
             node __wrappid-tag.js ${{ steps.release-type-input.outputs.version_type }}
             rm __wrappid-tag.js
