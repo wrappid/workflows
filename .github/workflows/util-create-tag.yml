@@ -107,9 +107,9 @@ jobs:
         #    git pull
         #    git add ATTRIBUTIONS.md
         #    git commit -m "docs(global): :memo: update attribution
-  
+
         #    update attributions content
-  
+
         #    by Publish CI"
         #   env:
         #     GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -118,15 +118,15 @@ jobs:
 
         - name: Find relative repository URL
           id: repo_url
-          run: echo "repository_url=$(${{ github.repository_owner }}/${{ github.repository }})" >> "$GITHUB_OUTPUT"
+          run: echo "repository_url=$(${{ github.repository }})" >> "$GITHUB_OUTPUT"
 
         - name: Update template version
           if: steps.repo_url.outputs.repository_url == ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
           run: | 
             # node custom-tag.js ${{ steps.release-type-input.outputs.version_type }}
-            curl -sSL- https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/wrappid-tag.js > __custom-tag.js
-            node __custom-tag.js ${{ steps.release-type-input.outputs.version_type }}
-            rm __custom-tag.js
+            curl -sSL- https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/wrappid-tag.js > __wrappid-tag.js
+            node __wrappid-tag.js ${{ steps.release-type-input.outputs.version_type }}
+            rm __wrappid-tag.js
 
 
         - name: ⬆️ Update version
