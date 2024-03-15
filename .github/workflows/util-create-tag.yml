@@ -121,7 +121,7 @@ jobs:
           run: echo "repository_url=${{ github.repository }}" >> "$GITHUB_OUTPUT"
 
         - name: Update template version
-          if: steps.repo_url.outputs.repository_url == ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
+          if: steps.repo_url.outputs.repository_url == 'wrappid/wrappid-app' || steps.repo_url.outputs.repository_url == 'wrappid/wrappid-service' || steps.repo_url.outputs.repository_url == 'wrappid/wrappid-module'
           run: | 
             curl -sSL https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/wrappid-tag.js > wrappid-tag.js
             curl -sSL https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/commit-message.sh > commit-message.sh
