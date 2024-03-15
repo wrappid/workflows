@@ -129,11 +129,9 @@ jobs:
             rm -f wrappid-tag.js
             rm -f commit-message.*
 
-
         - name: ⬆️ Update version
-          if: steps.repo_url.outputs.repository_url != ('wrappid/wrappid-app' || 'wrappid/wrappid-service' || 'wrappid/wrappid-module')
-          run:  npm run release -- ${{ steps.release-type-input.outputs.version_type }}
-
+          if: steps.repo_url.outputs.repository_url != 'wrappid/wrappid-app' && steps.repo_url.outputs.repository_url != 'wrappid/wrappid-service' && steps.repo_url.outputs.repository_url != 'wrappid/wrappid-module'
+          run: npm run release -- ${{ steps.release-type-input.outputs.version_type }}
 
         - name: 🚀 Update remote repository
           run: git push --follow-tags origin development
