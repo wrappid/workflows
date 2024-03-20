@@ -6,11 +6,11 @@ const standardVersion = require("standard-version");
 async function prepareVersion(options = {}) {
   try {
     // Read the current wrTemplateVersion
-    const wrappidMeta = JSON.parse(readFileSync(".wrappid/wrappid.meta.json", "utf-8"));
-    const currentVersion = wrappidMeta.wrTemplateVersion;
+    let wrappidMeta = JSON.parse(readFileSync(".wrappid/wrappid.meta.json", "utf-8"));
+    let currentVersion = wrappidMeta.wrTemplateVersion;
 
     // Extract version components
-    const [major, minor, patch] = currentVersion.split(".");
+    let [major, minor, patch] = currentVersion.split(".");
 
     // Update version based on options
     let newVersion;
@@ -49,7 +49,7 @@ async function prepareVersion(options = {}) {
 
     // Use standard-version internally
     await standardVersion({ skip: { commit: true, tag: true } });
-    
+   
     await new Promise((resolve, reject) => {
       exec("npm i", (error, stdout, stderr) => {
         if (error) {
@@ -88,7 +88,31 @@ async function prepareVersion(options = {}) {
 
     // Stage the wrappid.meta.json file
     await new Promise((resolve, reject) => {
-      exec("git add ./package.json ./package-lock.json ./.wrappid/wrappid.meta.json ./CHANGELOG.md 2>/dev/null && git commit -F commit-message.txt && git tag v" + newVersion, (error, stdout, stderr) => {
+      // eslint-disable-next-line quotes
+      exec(`git add ./package.json ./package-lock.json ./.wrappid/wrappid.meta.json ./CHANGELOG.md 2>/dev/null`, (error, stdout, stderr) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Error staging wrappid.meta.json: ${error.message}`);
+          reject(error);
+          return;
+        }
+        if (stderr) {
+          // eslint-disable-next-line no-console
+          console.error(`Error staging wrappid.meta.json: ${stderr}`);
+          reject(stderr);
+          return;
+        }
+        resolve();
+      });
+    });
+    
+    // eslint-disable-next-line no-console
+    console.log("Successfully added changes");
+
+    // Stage the wrappid.meta.json file
+    await new Promise((resolve, reject) => {
+      // eslint-disable-next-line quotes
+      exec(`git commit -F commit-message.txt --no-verify`, (error, stdout, stderr) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.error(`Error staging wrappid.meta.json: ${error.message}`);
@@ -106,6 +130,28 @@ async function prepareVersion(options = {}) {
     });
 
     // eslint-disable-next-line no-console
+    console.log(`Successfully committed changes for version: ${newVersion}`);
+    
+    // Create a tag for the new version
+    await new Promise((resolve, reject) => {
+      exec(`git tag v${newVersion}`, (error, stdout, stderr) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Error creating tag for version ${newVersion}: ${error.message}`);
+          reject(error);
+          return;
+        }
+        if (stderr) {
+          // eslint-disable-next-line no-console
+          console.error(`Error creating tag for version ${newVersion}: ${stderr}`);
+          reject(stderr);
+          return;
+        }
+        resolve();
+      });
+    });
+
+    // eslint-disable-next-line no-console
     console.log(`Successfully created tag: v${newVersion}`);
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -115,16 +161,16 @@ async function prepareVersion(options = {}) {
 }
 
 // Parse command-line arguments
-const args = process.argv.slice(2);
+let args = process.argv.slice(2);
 
 // eslint-disable-next-line no-console
 console.log("Command-line arguments:", args);
 
-const options = {};
+let options = {};
 
 for (let i = 0; i < args.length; i += 2) {
-  const option = args[i].replace(/--?/, "");
-  const value = args[i + 1];
+  let option = args[i].replace(/--?/, "");
+  let value = args[i + 1];
 
   if (option === "r") {
     options.release = value;
