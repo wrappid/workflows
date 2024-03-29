@@ -137,6 +137,9 @@ jobs:
         - name: 🚀 Update remote repository
           run: git push --follow-tags origin development
 
+        - name: Push Tags
+          run: git push --tags
+
           
         - name: Extract version
           id: extract_version
