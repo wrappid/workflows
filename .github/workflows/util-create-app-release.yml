@@ -93,94 +93,94 @@ jobs:
 # TODO 1: DIFFERENT JOB TO CREATE BUILD AND BUILD ARTIFACT.
 # TODO 2: EACH BUILD PARALLEL JOB --> DONE
 # TODO 3: OPTION TO SKIP PARTICULAR BUILD
+#commented for testing
+#   build-android:
+#     needs: check-pre-requisites
+#     name: Build Android
+#     if: needs.check-pre-requisites.outputs.release-exist == 'no'
+#     runs-on: ubuntu-latest
+#     steps:
 
-  build-android:
-    needs: check-pre-requisites
-    name: Build Android
-    if: needs.check-pre-requisites.outputs.release-exist == 'no'
-    runs-on: ubuntu-latest
-    steps:
+#       - name: 🛒 Checkout Tag
+#         uses: actions/checkout@v4
+#         with:
+#           ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
+#           token: ${{ secrets.PAT }}
 
-      - name: 🛒 Checkout Tag
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
-          token: ${{ secrets.PAT }}
+#       - name: 🛠 Set up Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 18
+#           cache: 'npm'
+#           registry-url: https://npm.pkg.github.com/wrappid
+#         env:
+#           NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN }} 
 
-      - name: 🛠 Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-          registry-url: https://npm.pkg.github.com/wrappid
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.WRAPPID_REGISTRY_TOKEN }} 
+#       - name: 🛠 Setup gh and git
+#         run: |
+#           echo ${{secrets.PAT}} | gh auth login --with-token
+#           git config user.name "${{ inputs.GIT_USER_NAME}}"
+#           git config user.email "${{ secrets.GIT_USER_EMAIL }}"
 
-      - name: 🛠 Setup gh and git
-        run: |
-          echo ${{secrets.PAT}} | gh auth login --with-token
-          git config user.name "${{ inputs.GIT_USER_NAME}}"
-          git config user.email "${{ secrets.GIT_USER_EMAIL }}"
+#       - name: Setup Wrappid npm registry
+#         run: |
+#           npm config set @wrappid:registry https://npm.pkg.github.com/wrappid
+#           npm config set //npm.pkg.github.com/:_authToken ${{ secrets.WRAPPID_REGISTRY_TOKEN }}
 
-      - name: Setup Wrappid npm registry
-        run: |
-          npm config set @wrappid:registry https://npm.pkg.github.com/wrappid
-          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.WRAPPID_REGISTRY_TOKEN }}
+#       - name: ⬇️ Setup Project
+#         run: | 
+#          echo Installing Node Modules
+#          npm ci --omit-dev
 
-      - name: ⬇️ Setup Project
-        run: | 
-         echo Installing Node Modules
-         npm ci --omit-dev
+#       - name: Setup Wrappid Toolkit
+#         run: npm install -g @wrappid/toolkit@${{ inputs.TOOLKIT_VERSION }}
 
-      - name: Setup Wrappid Toolkit
-        run: npm install -g @wrappid/toolkit@${{ inputs.TOOLKIT_VERSION }}
+#       - name: Check Wrappid Version
+#         run: wrappid --version
 
-      - name: Check Wrappid Version
-        run: wrappid --version
+#       - name: Wrappid setup mobile
+#         run: |
+#           gh auth status
+#           echo Starting Setup.........................
+#           wrappid setup mobile --env=stage
 
-      - name: Wrappid setup mobile
-        run: |
-          gh auth status
-          echo Starting Setup.........................
-          wrappid setup mobile --env=stage
+#       - name: Setup JDK 11
+#         uses: actions/setup-java@v3
+#         with:
+#           java-version: '11'
+#           distribution: 'temurin'
+#           cache: gradle
+# #           cache-dependency-path: /.wrappid/runtime/mobile/android/
 
-      - name: Setup JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-          cache: gradle
-#           cache-dependency-path: /.wrappid/runtime/mobile/android/
+#       - name: Change Permission of Gradle
+#         run: cd .wrappid/runtime/mobile/android/ && chmod +x gradlew
 
-      - name: Change Permission of Gradle
-        run: cd .wrappid/runtime/mobile/android/ && chmod +x gradlew
+#       - name: Build Wrappid android
+#         run: |
+#           gh auth status
+#           echo Starting Build.........................
+#           wrappid build android
 
-      - name: Build Wrappid android
-        run: |
-          gh auth status
-          echo Starting Build.........................
-          wrappid build android
+#       - name: Print version
+#         run: echo ${{ needs.check-pre-requisites.outputs.tag-version }}
 
-      - name: Print version
-        run: echo ${{ needs.check-pre-requisites.outputs.tag-version }}
+#       - run: ls -l
 
-      - run: ls -l
+#       - name: Move apk to root
+#         run: mv build/mobile/android/app-debug.apk android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk
 
-      - name: Move apk to root
-        run: mv build/mobile/android/app-debug.apk android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk
+#       - run: ls -l
 
-      - run: ls -l
+#       - name: Get wrappid logs
+#         run: cp $(npm root -g)/@wrappid/logs/logs.log android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
 
-      - name: Get wrappid logs
-        run: cp $(npm root -g)/@wrappid/logs/logs.log android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
-
-      - name: Upload Android Artifact
-        uses: actions/upload-artifact@v4
-        with:
-            name: android-${{ needs.check-pre-requisites.outputs.tag-version }}
-            path: |
-              android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk
-              android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
+#       - name: Upload Android Artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#             name: android-${{ needs.check-pre-requisites.outputs.tag-version }}
+#             path: |
+#               android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk
+#               android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
 
   build-web:
     needs: check-pre-requisites
@@ -266,7 +266,8 @@ jobs:
               web-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
 
   create-release:
-    needs: [check-pre-requisites, build-web, build-android]
+  #removed build-android for testing
+    needs: [check-pre-requisites, build-web]
     name: Create Release
     if: needs.check-pre-requisites.outputs.release-exist == 'no'
     runs-on: ubuntu-latest
@@ -288,11 +289,11 @@ jobs:
       - name: Generate Release notes
         run: curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/release_notes.sh | bash -s ${{ github.repository_owner }} ${{ github.event.repository.name }}
 
-
-      - name: Download Android Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: android-${{ needs.check-pre-requisites.outputs.tag-version }}
+#commented for testing
+      # - name: Download Android Artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: android-${{ needs.check-pre-requisites.outputs.tag-version }}
 
       - name: Download Web Artifact
         uses: actions/download-artifact@v4
@@ -322,17 +323,17 @@ jobs:
           asset_path: ./web-${{ needs.check-pre-requisites.outputs.tag-version }}.zip
           asset_name: "web-${{ needs.check-pre-requisites.outputs.tag-version }}.zip"
           asset_content_type: application/zip
-
-      - name: Upload Release Asset Android
-        id: upload-android-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk
-          asset_name: "android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk"
-          asset_content_type: application/vnd.android.package-archive
+#commented for testing
+      # - name: Upload Release Asset Android
+        # id: upload-android-release-asset 
+        # uses: actions/upload-release-asset@v1
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.PAT }}
+        # with:
+        #   upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        #   asset_path: ./android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk
+        #   asset_name: "android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk"
+        #   asset_content_type: application/vnd.android.package-archive
 
       - name: Upload Release Asset Web Wrappid-Logs
         id: upload-web-log-release-asset 
@@ -344,17 +345,17 @@ jobs:
           asset_path: ./web-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
           asset_name: "web-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log"
           asset_content_type: text/plain
-
-      - name: Upload Release Asset Android Wrappid-Logs
-        id: upload-android-log-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
-          asset_name: "android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log"
-          asset_content_type: text/plain
+#commented for testing
+      # - name: Upload Release Asset Android Wrappid-Logs
+      #   id: upload-android-log-release-asset 
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.PAT }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+      #     asset_path: ./android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
+      #     asset_name: "android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log"
+      #     asset_content_type: text/plain
 
   call-send-email-released:
       needs: [create-release, check-pre-requisites]
