@@ -174,6 +174,7 @@ jobs:
 #       - name: Get wrappid logs
 #         run: cp $(npm root -g)/@wrappid/logs/logs.log android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
 
+# TODO: retention-days value from input parameter
 #       - name: Upload Android Artifact
 #         uses: actions/upload-artifact@v4
 #         with:
@@ -181,6 +182,7 @@ jobs:
 #             path: |
 #               android-${{ needs.check-pre-requisites.outputs.tag-version }}.apk
 #               android-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
+#             retention-days: 1
 
   build-web:
     needs: check-pre-requisites
@@ -257,6 +259,7 @@ jobs:
 
       - run: ls -l
 
+# TODO: retention-days value from input parameter
       - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -264,6 +267,7 @@ jobs:
             path: |
               web-${{ needs.check-pre-requisites.outputs.tag-version }}.zip
               web-wrappid-logs-${{ needs.check-pre-requisites.outputs.tag-version }}.log
+            retention-days: 1
 
   create-release:
   #removed build-android for testing
