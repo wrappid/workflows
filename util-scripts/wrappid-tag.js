@@ -50,23 +50,23 @@ async function prepareVersion(options = {}) {
     // Use standard-version internally
     await standardVersion({ skip: { commit: true, tag: true } });
    
-    await new Promise((resolve, reject) => {
-      exec("npm i", (error, stdout, stderr) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Error running npm installation: ${error.message}`);
-          reject(error);
-          return;
-        }
-        if (stderr) {
-          // eslint-disable-next-line no-console
-          console.error(`Error running npm installation: ${stderr}`);
-          reject(stderr);
-          return;
-        }
-        resolve();
-      });
-    });
+    // await new Promise((resolve, reject) => {
+    //   exec("npm i", (error, stdout, stderr) => {
+    //     if (error) {
+    //       // eslint-disable-next-line no-console
+    //       console.error(`Error running npm installation: ${error.message}`);
+    //       reject(error);
+    //       return;
+    //     }
+    //     if (stderr) {
+    //       // eslint-disable-next-line no-console
+    //       console.error(`Error running npm installation: ${stderr}`);
+    //       reject(stderr);
+    //       return;
+    //     }
+    //     resolve();
+    //   });
+    // });
     // create commit message
     await new Promise((resolve, reject) => {
       exec("bash commit-message.sh " + newVersion, (error, stdout, stderr) => {
