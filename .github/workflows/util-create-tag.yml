@@ -93,7 +93,7 @@ jobs:
         - name: ⬇️ Setup Project
           run: | 
            echo Installing Node Modules
-           npm ci
+           npm ci --force
   
 ## TODO: 
 ##       ADD ATTRIBUTION TRIGGER
