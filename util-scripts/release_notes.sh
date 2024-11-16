@@ -9,57 +9,89 @@ release_notes_file="RELEASE_NOTES.md"
 touch "$release_notes_file"
 
 # Add a header to the release notes file
-echo "# Release Notes" >"$release_notes_file"
-echo >>"$release_notes_file"
+echo "# Release Notes" > "$release_notes_file"
+echo >> "$release_notes_file"
 
-# Get the latest two tags sorted in descending order
-tags=$(git tag --list --sort=version:refname | tail -n 2)
-reversed_tags=$(echo "$tags" | awk '{a[i++]=$0} END {for (j=i-1; j>=0;) print a[j--] }')
+# Get the latest two tags sorted in descending order (newest first)
+tags=$(git tag --sort=-version:refname | head -n 2)
+
 # Split the tags into an array
-tag_array=($reversed_tags)
+IFS=$'\n' read -d '' -r -a tag_array <<< "$tags"
+
+# Debug output
+echo "Latest two tags:"
+echo "${tag_array[0]}"
+echo "${tag_array[1]}"
 
 # Check if there are at least two tags
 if [ ${#tag_array[@]} -ge 2 ]; then
-  current_tag="${tag_array[0]}"
-  previous_tag="${tag_array[1]}"
+    current_tag="${tag_array[0]}"
+    previous_tag="${tag_array[1]}"
 
-  # Get the commit messages between the previous tag and the current tag
-  echo "## Version $current_tag" >>"$release_notes_file"
+    echo "Current tag: $current_tag"
+    echo "Previous tag: $previous_tag"
 
-  # Extract fix, bug, feat, features commits
-  fix_log=$(git log --pretty=format:"* [%s](https://github.com/$OWNER_NAME/$REPO_NAME/commit/%H)" "$current_tag...$previous_tag" --grep "^fix:")
-  bug_log=$(git log --pretty=format:"* [%s](https://github.com/$OWNER_NAME/$REPO_NAME/commit/%H)" "$current_tag...$previous_tag" --grep "^bug:")
-  feat_log=$(git log --pretty=format:"* [%s](https://github.com/$OWNER_NAME/$REPO_NAME/commit/%H)" "$current_tag...$previous_tag" --grep "^feat:")
-  features_log=$(git log --pretty=format:"* [%s](https://github.com/$OWNER_NAME/$REPO_NAME/commit/%H)" "$current_tag...$previous_tag" --grep "^features:")
-  refactors_log=$(git log --pretty=format:"* [%s](https://github.com/$OWNER_NAME/$REPO_NAME/commit/%H)" "$current_tag...$previous_tag" --grep "^refactor:")
+    # Get the commit messages between the previous tag and the current tag
+    echo "## Version $current_tag" >> "$release_notes_file"
+    echo >> "$release_notes_file"
 
-  if [[ -n $fix_log ]]; then
-    echo "### Fixes" >>"$release_notes_file"
-    echo "$fix_log" >>"$release_notes_file"
-  fi
+    # Commit types and sections in the specified order
+    commit_types_order=("feat" "fix" "perf" "refactor" "revert" "test" "docs")
+    declare -A commit_type_titles=(
+        ["feat"]="Features"
+        ["fix"]="Fixes"
+        ["perf"]="Performance Improvements"
+        ["refactor"]="Refactorings"
+        ["revert"]="Reversions"
+        # ["build"]="Builds"
+        # ["ci"]="Continuous Integration"
+        ["test"]="Test Cases"
+        ["docs"]="Documentation"
+        # ["chore"]="Chores"
+        # ["style"]="Code Style Changes"
+    )
 
-  if [[ -n $bug_log ]]; then
-    echo "### Bugs" >>"$release_notes_file"
-    echo "$bug_log" >>"$release_notes_file"
-  fi
+    # Track if any sections were created
+    sections_created=false
 
-  if [[ -n $feat_log ]]; then
-    echo "### Features" >>"$release_notes_file"
-    echo "$feat_log" >>"$release_notes_file"
-  fi
+    # Iterate over the commit types in the specified order
+    for commit_type in "${commit_types_order[@]}"; do
+        # Extract log entries for the current commit type
+        log_entries=$(git log --pretty=format:"* [%s](https://github.com/$OWNER_NAME/$REPO_NAME/commit/%H)%n%b" "$previous_tag..$current_tag" --grep="^$commit_type")
 
-  if [[ -n $features_log ]]; then
-    echo "### Features" >>"$release_notes_file"
-    echo "$features_log" >>"$release_notes_file"
-  fi
+        # Debug output
+        echo "$commit_type log content:"
+        echo "$log_entries"
 
-  if [[ -n $refactors_log ]]; then
-    echo "### Refactorings" >>"$release_notes_file"
-    echo "$refactors_log" >>"$release_notes_file"
-  fi
+        # Add section to release notes if there are entries for this type
+        if [[ -n $log_entries ]]; then
+            section_title=${commit_type_titles[$commit_type]}
+            echo "### $section_title" >> "$release_notes_file"
+            
+            # Process each log entry, maintaining line spacing
+            while IFS= read -r line; do
+                if [[ "$line" =~ ^\* ]]; then
+                    # If it's a new commit entry, print it as-is
+                    echo "$line" >> "$release_notes_file"
+                elif [[ -n "$line" ]]; then
+                    # If it's a description, indent it with two spaces
+                    echo "  $line" >> "$release_notes_file"
+                fi
+            done <<< "$log_entries"
+
+            echo >> "$release_notes_file"
+            sections_created=true
+        fi
+    done
+
+    # If no sections were created, add a default message
+    if [ "$sections_created" = false ]; then
+        echo "No changes found." >> "$release_notes_file"
+        echo >> "$release_notes_file"
+    fi
 
 else
-  echo "Not enough tags found for comparison."
+    echo "Not enough tags found for comparison."
 fi
 
 echo "Created $release_notes_file."
