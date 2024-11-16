@@ -111,7 +111,7 @@ jobs:
       - name: 🛠 Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: 'npm'
           registry-url: https://npm.pkg.github.com/wrappid
         env:
@@ -259,7 +259,24 @@ jobs:
       permissions: write-all
       uses: wrappid/workflows/.github/workflows/send-email-released.yml@main
       with:
-        tag-version: ${{ needs.create-release.outputs.tag-version }}
+        tag-version: ${{ needs.check-pre-requisites.outputs.tag-version }}
+        EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
+      secrets:
+        EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+        EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
+        EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
+        EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        EMAIL_CC: ${{ secrets.EMAIL_CC }}       ## Optional
+        EMAIL_BCC: ${{ secrets.EMAIL_BCC }}     ## Optional
+
+  call-send-email-failure:
+      needs: [ check-pre-requisites, create-release ]
+      if: always() && ( needs.check-pre-requisites.result == 'failure' || needs.create-release.result == 'failure')
+      permissions: write-all
+      uses: wrappid/workflows/.github/workflows/send-email-failure.yml@main
+      with:
+        tag-version: ${{ needs.check-pre-requisites.outputs.tag-version }}
         EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
       secrets:
         EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
