@@ -283,6 +283,7 @@ jobs:
         with:
           ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
           token: ${{ secrets.PAT }}
+          fetch-depth: 0
 
       - name: 🛠 Setup gh and git
         run: |
