@@ -104,6 +104,7 @@ jobs:
         with:
           ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
           token: ${{ secrets.PAT }}
+          fetch-depth: 0
        
       - name: 🛠 Set up Node.js
         uses: actions/setup-node@v4
