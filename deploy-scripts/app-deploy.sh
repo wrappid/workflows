@@ -2,12 +2,23 @@
 # Script Author : Ananta Kumar Ghosh
 # Contact       : ananta@anantakumarghosh.me
 #               : antaghosh@protonmail.com
-# Description   : This script downloads latest release from  github ($OWNER_NAME/$REPONAME)
+# Description   : This script downloads release of provided tag version from  github ($OWNER_NAME/$REPONAME)
 #                 and extracts it.
 
 PROJECT_DEPLOYMENT_PATH=$1
 OWNER_NAME=$2
 REPONAME=$3
+TAG_VERSION=$4
+
+
+echo "========================="
+echo "Received Arguments:"
+echo "PROJECT_DEPLOYMENT_PATH: $PROJECT_DEPLOYMENT_PATH" #todo: mask
+echo "OWNER_NAME: $OWNER_NAME"
+echo "REPONAME: $REPONAME"
+echo "TAG_VERSION: $TAG_VERSION"
+echo "========================="
+
 # DESTINATION="/usr/share/nginx"
 create_folder_if_not_exists() {
     folder_path="$1"
@@ -34,7 +45,7 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "STARTING DOWNLOAD OF $REPONAME ..."
-gh release download --pattern "web*.zip" -R "$OWNER_NAME"/"$REPONAME"
+gh release download --pattern "web*.zip" -R "$OWNER_NAME"/"$REPONAME" --tag "$TAG_VERSION"
 echo "========================="
 echo "DOWNLOADED FILES:"
 ls -al
