@@ -104,7 +104,6 @@ jobs:
        with:
          token: ${{ secrets.PAT }}
          fetch-depth: 0
-         ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
 
      - name: Print received tag from action
        run: echo ${{ needs.check-pre-requisites.outputs.tag-version }}
