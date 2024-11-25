@@ -45,7 +45,7 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "STARTING DOWNLOAD OF $REPONAME ..."
-gh release download --pattern "web*.zip" -R "$OWNER_NAME"/"$REPONAME" --tag "$TAG_VERSION"
+gh release download "$TAG_VERSION" --pattern "web*.zip" -R "$OWNER_NAME"/"$REPONAME"
 echo "========================="
 echo "DOWNLOADED FILES:"
 ls -al
