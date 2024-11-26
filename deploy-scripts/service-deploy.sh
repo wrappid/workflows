@@ -8,6 +8,16 @@
 PROJECT_DEPLOYMENT_PATH=$1
 OWNER_NAME=$2
 REPONAME=$3
+TAG_VERSION=$4
+
+
+echo "========================="
+echo "Received Arguments:"
+echo "PROJECT_DEPLOYMENT_PATH: $PROJECT_DEPLOYMENT_PATH" #todo: mask
+echo "OWNER_NAME: $OWNER_NAME"
+echo "REPONAME: $REPONAME"
+echo "TAG_VERSION: $TAG_VERSION"
+echo "========================="
 
 create_folder_if_not_exists() {
     folder_path="$1"
@@ -35,7 +45,7 @@ echo "SHOW ALL FILES:"
 ls -al
 echo "========================="
 echo "STARTING DOWNLOAD OF $REPONAME ..."
-gh release download --pattern "service*.zip" -R $OWNER_NAME/$REPONAME
+gh release download "$TAG_VERSION" --pattern "service*.zip" -R "$OWNER_NAME"/"$REPONAME"
 echo "========================="
 echo "DOWNLOADED FILES:"
 ls -al

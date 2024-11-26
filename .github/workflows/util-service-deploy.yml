@@ -1,5 +1,4 @@
 name: Service Deploy - CD
-
 on:
   workflow_call:
     inputs:
@@ -12,32 +11,37 @@ on:
         type: string
       PROJECT_HOSTED_URL:
         type: string
+      TAG_VERSION:
+        required: false
+        type: string
+        description: 'Specific tag version to deploy'
     secrets:
       PAT:
         required: true
       REMOTE_HOST:
-         required: true
+        required: true
       REMOTE_SSH_KEY:
-         required: true
+        required: true
       REMOTE_SSH_USER:
-         required: true
+        required: true
       REMOTE_PATH_OF_PROJECT_DEPLOYMENT_PATH:
-         required: true
-## Below secrets are required if EMAIL_NOTIFY is TRUE
+        required: true
+      ## Below secrets are required if EMAIL_NOTIFY is TRUE
       EMAIL_SERVER_ADDRESS:
       EMAIL_SERVER_PORT:
       EMAIL_USER_ID:
       EMAIL_USER_PASSWORD:
       EMAIL_TO:
-      EMAIL_CC:     ## Optional
-      EMAIL_BCC:    ## Optional
+      EMAIL_CC: ## Optional
+      EMAIL_BCC: ## Optional
 
 jobs:
-  service-deploy:
+  check-pre-requisites:
     runs-on: ubuntu-latest
-    name: Service Deploy
+    name: Check Pre-requisites
     outputs:
-      tag-version: ${{ steps.current-tag.outputs.tag }}
+      tag-version: ${{ steps.get-tag.outputs.tag }}
+      environment-variable: ${{ steps.generate-environment-variable.outputs.environment_variable }}
 
     steps:
       - name: Checkout
@@ -50,16 +54,66 @@ jobs:
         id: current-tag
         uses: WyriHaximus/github-action-get-previous-tag@v1
         with:
-          fallback: 1.0.0 # Optional fallback tag to use when no tag can be found
+          fallback: 1.0.0 #Optional fallback tag to use when no tag can be found
+
+      - name: Get Tag Version
+        id: get-tag
+        run: |
+          if [ -n "${{ inputs.TAG_VERSION }}" ]; then
+            echo "tag=${{ inputs.TAG_VERSION }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ steps.current-tag.outputs.tag }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Print received tag from action
-        run: echo ${{ steps.current-tag.outputs.tag }}
+        run: echo ${{ steps.get-tag.outputs.tag }}
 
-      - name: Deploy to Server
+      - name: Generate Environment Variable
+        id: generate-environment-variable
+        run: echo "environment_variable=$(curl -o- -s https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/generate_env_var.sh | bash -s ${{ github.event.repository.name }})" >> $GITHUB_OUTPUT
+
+      - name: Deploy Decide
+        id: deploy-decider
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_HOST }}       
           username: ${{ secrets.REMOTE_SSH_USER }}     
+          key: ${{ secrets.REMOTE_SSH_KEY }}
+          port: 22
+          script: |
+            source ~/.bashrc
+            decision=$(sudo -u ${{ secrets.REMOTE_SSH_USER }} curl -o- -s https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/deploy_decider.sh | bash -s ${{ steps.generate-environment-variable.outputs.environment_variable }} ${{ steps.get-tag.outputs.tag }})
+            source ~/.bashrc
+            if [ "$decision" = "FAIL" ]; then
+                echo "Decision is FAIL. Exiting."
+                exit 1
+            else
+                echo "Decision is not FAIL. Continuing."
+            fi
+
+  service-deploy:
+    needs: check-pre-requisites
+    runs-on: ubuntu-latest
+    name: Service Deploy
+    outputs:
+      tag-version: ${{ needs.check-pre-requisites.outputs.tag-version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
+          ref: ${{ needs.check-pre-requisites.outputs.tag-version }}
+
+      - name: Print received tag from action
+        run: echo ${{ needs.check-pre-requisites.outputs.tag-version }}
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_SSH_USER }}
           key: ${{ secrets.REMOTE_SSH_KEY }}
           port: 22
           script: |
@@ -70,45 +124,43 @@ jobs:
           sleep 10
           URL="${{ inputs.PROJECT_HOSTED_URL }}"
           response_code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
-
           echo "Response code: $response_code"
-
           if [ "$response_code" -ne 200 ]; then
-              echo "URL is not accessible."
-              exit 1
+            echo "URL is not accessible."
+            exit 1
           fi
 
   call-send-email-deployed:
-      needs: service-deploy
-      if: ${{ inputs.EMAIL_NOTIFY }} == true
-      permissions: write-all
-      uses: wrappid/workflows/.github/workflows/send-email-deploy.yml@main
-      secrets:
-        EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
-        EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
-        EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
-        EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
-        EMAIL_TO: ${{ secrets.EMAIL_TO }}
-        EMAIL_CC: ${{ secrets.EMAIL_CC }}       ## Optional
-        EMAIL_BCC: ${{ secrets.EMAIL_BCC }}     ## Optional
-      with:
-        tag-version: ${{ needs.service-deploy.outputs.tag-version }}
-        EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
-        PROJECT_HOSTED_URL: ${{ inputs.PROJECT_HOSTED_URL }}
+    needs: [ service-deploy, check-pre-requisites ]
+    if: ${{ inputs.EMAIL_NOTIFY }} == true
+    permissions: write-all
+    uses: wrappid/workflows/.github/workflows/send-email-deploy.yml@main
+    secrets:
+      EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+      EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
+      EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
+      EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      EMAIL_CC: ${{ secrets.EMAIL_CC }} ## Optional
+      EMAIL_BCC: ${{ secrets.EMAIL_BCC }} ## Optional
+    with:
+      tag-version: ${{ needs.check-pre-requisites.outputs.tag-version }}
+      EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
+      PROJECT_HOSTED_URL: ${{ inputs.PROJECT_HOSTED_URL }}
 
   call-send-email-failure:
-      needs: [ service-deploy ]
-      if: always() && needs.service-deploy.result == 'failure'
-      permissions: write-all
-      uses: wrappid/workflows/.github/workflows/send-email-failure.yml@main
-      with:
-        tag-version: ${{ needs.service-deploy.outputs.tag-version }}
-        EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
-      secrets:
-        EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
-        EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
-        EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
-        EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
-        EMAIL_TO: ${{ secrets.EMAIL_TO }}
-        EMAIL_CC: ${{ secrets.EMAIL_CC }}       ## Optional
-        EMAIL_BCC: ${{ secrets.EMAIL_BCC }}     ## Optional
+    needs: [ service-deploy, check-pre-requisites ]
+    if: always() && (needs.check-pre-requisites.result == 'failure' || needs.service-deploy.result == 'failure')
+    permissions: write-all
+    uses: wrappid/workflows/.github/workflows/send-email-failure.yml@main
+    with:
+      tag-version: ${{ needs.check-pre-requisites.outputs.tag-version }}
+      EMAIL_SENDER_NAME: ${{ inputs.EMAIL_SENDER_NAME }}
+    secrets:
+      EMAIL_SERVER_ADDRESS: ${{ secrets.EMAIL_SERVER_ADDRESS }}
+      EMAIL_SERVER_PORT: ${{ secrets.EMAIL_SERVER_PORT }}
+      EMAIL_USER_ID: ${{ secrets.EMAIL_USER_ID }}
+      EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      EMAIL_CC: ${{ secrets.EMAIL_CC }} ## Optional
+      EMAIL_BCC: ${{ secrets.EMAIL_BCC }} ## Optional
