@@ -61,8 +61,8 @@ jobs:
         env:
             REPOSITORIES: ${{ steps.parse-repos.outputs.repositories }}
         run: |
-            chmod +x .github/scripts/check_tag_existance.sh
-            .github/scripts/check_tag_existance.sh "$REPOSITORIES"
+            # Download and execute script to check tag existence
+            curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/.github/scripts/check_tag_existance.sh | bash -s "$REPOSITORIES"
             
             # Set outputs for repos with and without bump
             echo "repos-to-create-tag=$(cat with_bump_version.txt)" >> $GITHUB_OUTPUT
