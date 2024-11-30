@@ -27,6 +27,8 @@ on:
 jobs:
   check-tag-existance:
     runs-on: ubuntu-latest
+    env:
+        REPOOWNER: ${{ inputs.repo-owner }}
     outputs:
       repos-to-create-tag: ${{ steps.process-repos.outputs.repos-to-create-tag }}
       repos-do-not-create-tag: ${{ steps.process-repos.outputs.repos-do-not-create-tag }}
@@ -48,7 +50,7 @@ jobs:
             REPO_LIST: ${{ inputs.repo-list }}
         run: |
             # Parse JSON and convert to comma-separated list
-            REPOS=$(echo '${{ inputs.repo-list }}' | jq -r '.wrappid | join(",")')
+            REPOS=$(echo '${{ inputs.repo-list }}' | jq -r '.$REPOOWNER | join(",")')
             echo "repositories=$REPOS" >> $GITHUB_OUTPUT
         
       - name: Show parsed repositories
@@ -59,7 +61,6 @@ jobs:
       - name: Check Tag Existence
         id: process-repos
         env:
-            REPOOWNER: ${{ inputs.repo-owner }}
             REPOSITORIES: ${{ steps.parse-repos.outputs.repositories }}
         run: |
             chmod +x .github/scripts/check_tag_existance.sh
