@@ -1,0 +1,58 @@
+name: Check Tag Existence Workflow
+
+on:
+  workflow_call:
+    inputs:
+      repo-list:
+        description: "JSON-formatted list of repositories"
+        required: true
+        type: string
+      repo-owner:
+        description: "Owner of the repositories"
+        required: true
+        type: string
+    outputs:
+      repos-to-create-tag:
+        description: "Repositories with version bump"
+        value: ${{ jobs.check-tag-existance.outputs.repos-to-create-tag }}
+      repos-do-not-create-tag:
+        description: "Repositories without version bump"
+        value: ${{ jobs.check-tag-existance.outputs.repos-do-not-create-tag }}
+
+jobs:
+  check-tag-existance:
+    runs-on: ubuntu-latest
+    outputs:
+      repos-to-create-tag: ${{ steps.process-repos.outputs.repos-to-create-tag }}
+      repos-do-not-create-tag: ${{ steps.process-repos.outputs.repos-do-not-create-tag }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Important to fetch all history for commit checks
+    
+    - name: Setup GitHub CLI
+      run: echo ${{secrets.PAT}} | gh auth login --with-token
+    
+    - name: Parse Repositories
+      id: parse-repos
+      env:
+        REPO_LIST: ${{ inputs.repo-list }}
+      run: |
+        # Parse JSON and convert to comma-separated list
+        REPOS=$(echo '${{ inputs.repo-list }}' | jq -r '.wrappid | join(",")')
+        echo "repositories=$REPOS" >> $GITHUB_OUTPUT
+    
+    - name: Check Tag Existence
+      id: process-repos
+      env:
+        REPOOWNER: ${{ inputs.repo-owner }}
+        REPOSITORIES: ${{ steps.parse-repos.outputs.repositories }}
+      run: |
+        chmod +x .github/scripts/check_tag_existance.sh
+        .github/scripts/check_tag_existance.sh "$REPOSITORIES"
+        
+        # Set outputs for repos with and without bump
+        echo "repos-to-create-tag=$(cat with_bump_version.txt)" >> $GITHUB_OUTPUT
+        echo "repos-do-not-create-tag=$(cat without_bump_version.txt)" >> $GITHUB_OUTPUT
