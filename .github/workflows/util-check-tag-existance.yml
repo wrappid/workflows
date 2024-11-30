@@ -46,6 +46,7 @@ jobs:
         run: echo ${{secrets.PAT}} | gh auth login --with-token
         
       - name: Parse Repositories
+        id: parse-repos
         env:
           REPOOWNER: ${{ inputs.repo-owner }}
           REPO_LIST: ${{ inputs.repo-list }}
