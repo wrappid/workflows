@@ -73,6 +73,18 @@ jobs:
             # Download and execute script to check tag existence
             curl -o- https://raw.githubusercontent.com/wrappid/workflows/main/.github/scripts/check_tag_existance.sh | bash -s "$REPOSITORIES"
             
-            # Set outputs for repos with and without bump
-            echo "repos-to-create-tag=$(cat with_bump_version.txt)" >> $GITHUB_OUTPUT
-            echo "repos-do-not-create-tag=$(cat without_bump_version.txt)" >> $GITHUB_OUTPUT
+            # Set outputs for repos with and without latest tag commit ID
+            echo "repos-do-not-create-tag=$(cat with_bump_version.txt)" >> $GITHUB_OUTPUT
+            echo "repos-to-create-tag=$(cat without_bump_version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Show Outputs
+        id: show-outputs
+        run: |
+            echo "Repos do not create tag: $(cat with_bump_version.txt)"
+            echo "Repos to create tag: $(cat without_bump_version.txt)"
+
+      - name: Show outputs passed
+        id: show-outputs-passed
+        run: |
+            echo "Repos do not create tag: ${{ steps.process-repos.outputs.repos-to-create-tag }}"
+            echo "Repos to create tag: ${{ steps.process-repos.outputs.repos-do-not-create-tag }}"
