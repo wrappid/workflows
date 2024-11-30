@@ -32,10 +32,19 @@ on:
         EMAIL_CC:     ## Optional
         EMAIL_BCC:    ## Optional
           
-jobs:        
+jobs:      
+    validate-tag-existance:
+      uses: wrappid/workflows/.github/workflows/util-check-tag-existance.yml@main
+      with:
+        repo-list: '{"${{ github.repository_owner }}":["${{ github.event.repository.name }}"]}'
+        repo-owner: ${{ github.repository_owner }}
+      secrets:
+        PAT: ${{ secrets.PAT }}
+
     create-tag:
       name: Create Tag
       runs-on: ubuntu-latest
+      if: contains(needs.validate-tag-existance.outputs.repos-to-create-tag, github.event.repository.name)
       permissions: write-all
       outputs:
         tag-version:  ${{ steps.extract_version.outputs.version }}
@@ -93,7 +102,7 @@ jobs:
         - name: ⬇️ Setup Project
           run: | 
            echo Installing Node Modules
-           npm ci --force
+           npm install --force
   
 ## TODO: 
 ##       ADD ATTRIBUTION TRIGGER
@@ -149,13 +158,13 @@ jobs:
           run: echo ${{ steps.extract_version.outputs.version }}
 
 
-    print-version:
-        runs-on: ubuntu-latest
-        needs: create-tag
-        permissions: write-all
-        steps:
-            - name: print
-              run: echo ${{ needs.create-tag.outputs.tag-version }}
+    # print-version:
+    #     runs-on: ubuntu-latest
+    #     needs: create-tag
+    #     permissions: write-all
+    #     steps:
+    #         - name: print
+    #           run: echo ${{ needs.create-tag.outputs.tag-version }}
 
     call-send-email-tag-created:
           needs: create-tag

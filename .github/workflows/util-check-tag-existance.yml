@@ -11,6 +11,11 @@ on:
         description: "Owner of the repositories"
         required: true
         type: string
+
+    secrets:
+      PAT:
+        required: true
+
     outputs:
       repos-to-create-tag:
         description: "Repositories with version bump"
@@ -25,34 +30,41 @@ jobs:
     outputs:
       repos-to-create-tag: ${{ steps.process-repos.outputs.repos-to-create-tag }}
       repos-do-not-create-tag: ${{ steps.process-repos.outputs.repos-do-not-create-tag }}
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # Important to fetch all history for commit checks
-    
-    - name: Setup GitHub CLI
-      run: echo ${{secrets.PAT}} | gh auth login --with-token
-    
-    - name: Parse Repositories
-      id: parse-repos
-      env:
-        REPO_LIST: ${{ inputs.repo-list }}
-      run: |
-        # Parse JSON and convert to comma-separated list
-        REPOS=$(echo '${{ inputs.repo-list }}' | jq -r '.wrappid | join(",")')
-        echo "repositories=$REPOS" >> $GITHUB_OUTPUT
-    
-    - name: Check Tag Existence
-      id: process-repos
-      env:
-        REPOOWNER: ${{ inputs.repo-owner }}
-        REPOSITORIES: ${{ steps.parse-repos.outputs.repositories }}
-      run: |
-        chmod +x .github/scripts/check_tag_existance.sh
-        .github/scripts/check_tag_existance.sh "$REPOSITORIES"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+            token: ${{ secrets.PAT }}
+            fetch-depth: 0 # Important to fetch all history for commit checks
+
+
+      - name: Setup GitHub CLI
+        run: echo ${{secrets.PAT}} | gh auth login --with-token
         
-        # Set outputs for repos with and without bump
-        echo "repos-to-create-tag=$(cat with_bump_version.txt)" >> $GITHUB_OUTPUT
-        echo "repos-do-not-create-tag=$(cat without_bump_version.txt)" >> $GITHUB_OUTPUT
+      - name: Parse Repositories
+        id: parse-repos
+        env:
+            REPO_LIST: ${{ inputs.repo-list }}
+        run: |
+            # Parse JSON and convert to comma-separated list
+            REPOS=$(echo '${{ inputs.repo-list }}' | jq -r '.wrappid | join(",")')
+            echo "repositories=$REPOS" >> $GITHUB_OUTPUT
+        
+      - name: Show parsed repositories
+        id: show-parsed-repos
+        run: |
+            echo "Received repositories: ${{ steps.parse-repos.outputs.repositories }}"
+
+      - name: Check Tag Existence
+        id: process-repos
+        env:
+            REPOOWNER: ${{ inputs.repo-owner }}
+            REPOSITORIES: ${{ steps.parse-repos.outputs.repositories }}
+        run: |
+            chmod +x .github/scripts/check_tag_existance.sh
+            .github/scripts/check_tag_existance.sh "$REPOSITORIES"
+            
+            # Set outputs for repos with and without bump
+            echo "repos-to-create-tag=$(cat with_bump_version.txt)" >> $GITHUB_OUTPUT
+            echo "repos-do-not-create-tag=$(cat without_bump_version.txt)" >> $GITHUB_OUTPUT
