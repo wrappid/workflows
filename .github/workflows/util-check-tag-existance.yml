@@ -46,11 +46,19 @@ jobs:
         run: echo ${{secrets.PAT}} | gh auth login --with-token
         
       - name: Parse Repositories
+        env:
+          REPOOWNER: ${{ inputs.repo-owner }}
+          REPO_LIST: ${{ inputs.repo-list }}
         run: |
+          # Print out the variables for debugging
+          echo "REPOOWNER: $REPOOWNER"
+          echo "REPO_LIST: $REPO_LIST"
+          
           # Parse JSON and convert to comma-separated list
           REPOS=$(echo "$REPO_LIST" | jq -r ".\"$REPOOWNER\" | join(\",\")")
+          echo "Parsed REPOS: $REPOS"
           echo "repositories=$REPOS" >> $GITHUB_OUTPUT
-        
+
       - name: Show parsed repositories
         id: show-parsed-repos
         run: |
