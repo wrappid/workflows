@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
         REPOOWNER: ${{ inputs.repo-owner }}
+        REPO_LIST: ${{ inputs.repo-list }}
     outputs:
       repos-to-create-tag: ${{ steps.process-repos.outputs.repos-to-create-tag }}
       repos-do-not-create-tag: ${{ steps.process-repos.outputs.repos-do-not-create-tag }}
@@ -45,13 +46,10 @@ jobs:
         run: echo ${{secrets.PAT}} | gh auth login --with-token
         
       - name: Parse Repositories
-        id: parse-repos
-        env:
-            REPO_LIST: ${{ inputs.repo-list }}
         run: |
-            # Parse JSON and convert to comma-separated list
-            REPOS=$(echo '${{ inputs.repo-list }}' | jq -r '.$REPOOWNER | join(",")')
-            echo "repositories=$REPOS" >> $GITHUB_OUTPUT
+          # Parse JSON and convert to comma-separated list
+          REPOS=$(echo "$REPO_LIST" | jq -r ".\"$REPOOWNER\" | join(\",\")")
+          echo "repositories=$REPOS" >> $GITHUB_OUTPUT
         
       - name: Show parsed repositories
         id: show-parsed-repos

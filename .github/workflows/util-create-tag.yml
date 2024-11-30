@@ -44,6 +44,7 @@ jobs:
     create-tag:
       name: Create Tag
       runs-on: ubuntu-latest
+      needs: ["validate-tag-existance"]
       if: contains(needs.validate-tag-existance.outputs.repos-to-create-tag, github.event.repository.name)
       permissions: write-all
       outputs:
