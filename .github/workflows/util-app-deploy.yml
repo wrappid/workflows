@@ -60,25 +60,6 @@ jobs:
         id: generate-environment-variable
         run: echo "environment_variable=$(curl -o- -s https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/generate_env_var.sh | bash -s ${{ github.event.repository.name }})" >> $GITHUB_OUTPUT
 
-      - name: Deploy Decide
-        id: deploy-decider
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_HOST }}       
-          username: ${{ secrets.REMOTE_SSH_USER }}     
-          key: ${{ secrets.REMOTE_SSH_KEY }}
-          port: 22
-          script: |
-            source ~/.bashrc
-            decision=$(sudo -u ${{ secrets.REMOTE_SSH_USER }} curl -o- -s https://raw.githubusercontent.com/wrappid/workflows/main/util-scripts/deploy_decider.sh | bash -s ${{ steps.generate-environment-variable.outputs.environment_variable }} ${{ steps.current-tag.outputs.tag }})
-            source ~/.bashrc
-            if [ "$decision" = "FAIL" ]; then
-                echo "Decision is FAIL. Exiting."
-                exit 1
-            else
-                echo "Decision is not FAIL. Continuing."
-            fi
-
 
   app-deploy:
     needs: check-pre-requisites
